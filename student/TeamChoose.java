@@ -21,6 +21,9 @@ public class TeamChoose {
 	// TODO: add data members (class variables)
 	Map <Integer, PastPlayDeets> playerGraph;
 	private Iterator<Map.Entry<Integer, PastPlayDeets>> gIt;
+
+	private Team bestTeamFound;
+private Double bestTeamScore;
 	
 	// Provided functions
 	
@@ -63,6 +66,7 @@ public class TeamChoose {
 		// PRE: -
 		// POST: Has initialised appropriate data members with
 		//           the graph defined by dataList
+		playerGraph.clear();
 		for(DataRow listVal: dataList) {
 			Integer player1 = listVal.getFirst();
 			Integer player2 = listVal.getSecond();
@@ -114,19 +118,15 @@ public class TeamChoose {
 		return null;
 	}
 	
-	public Double scoreBetween(Integer p1, Integer p2) { //done and marked
-		// PRE: p1 and p2 are valid player IDs
-		// POST: Returns score from past plays between p1 and p2
-		
-		// TODO
-		if(playerGraph.containsKey(p1) && playerGraph.containsKey(p2)) {
-			PastPlayDeets p1Deets = getPlayerDetails(p1);
-			
-			return p1Deets.getPlayerScore(p2);
+public Double scoreBetween(Integer p1, Integer p2) {
+    // PRE: p1 and p2 are valid player IDs
+    // POST: Returns score from past plays between p1 and p2
 
-		}
-		return null;
-	}
+    if (!playerGraph.containsKey(p1) || !playerGraph.containsKey(p2)) {
+        return 0.0;
+    }
+    return playerGraph.get(p1).getPlayerScore(p2);
+}
 	
 	public Double singlePlayerTeamScore(Integer p1) { //done and marked
 		// PRE: p1 is a valid player ID
@@ -190,18 +190,25 @@ public class TeamChoose {
 		// PRE: -
 		// POST: Returns all players as a single team
 		Team finalTeam = new Team();
-		Set teamSet = playerGraph.keySet();
+		Set<Integer> teamSet = playerGraph.keySet();
 		finalTeam.addAll(teamSet);
 		// TODO
 		
 		return finalTeam;
 	}
-	
+
 	public Team testWithLowestID(Team pTeam) { //done and tested
 		// PRE: -
 		// POST: Returns the team (i.e., either pTeam or the other player team) that has the lowest numbered player
 		Team otherTeam = otherTeam(pTeam);
 		Team mainTeam = pTeam;
+
+		if (mainTeam.isEmpty()) {
+			return otherTeam;
+		}
+		if (otherTeam.isEmpty()) {
+			return mainTeam;
+		}
 		
 		if(Collections.min(otherTeam) < Collections.min(mainTeam)) {
 			return otherTeam;
@@ -213,39 +220,28 @@ public class TeamChoose {
 	}
 	
 	
-	public Boolean isBetter(Team pTeam, Integer p1) {
-		// PRE: pTeam contains one or more valid player IDs; p1 is a valid player ID
-		// POST: If p1 is in pTeam, returns true if score of pTeam would be higher without p1,
-		//                                  false otherwise;
-		//       otherwise (i.e., p1 is not in pTeam),
-		//                          returns true if score of pTeam would be higher with p1
-		//                                  false otherwise;
+public Boolean isBetter(Team pTeam, Integer p1) {
+    // PRE: p1 is a valid player ID
+    // POST: If p1 is in pTeam, returns true if score of pTeam would be higher without p1,
+    //       false otherwise;
+    //       otherwise returns true if score of pTeam would be higher with p1,
+    //       false otherwise;
 
-		// TODO
+    Team modified = new Team();
+    modified.addAll(pTeam);
 
-		
-		if(pTeam != null) {
-			if(pTeam.size() >= 1 || playerGraph.containsKey(p1)) {
-				Team teamDup = new Team();
-				teamDup.addAll(pTeam);
-				Double originalScore = multiPlayerTeamScore(teamDup);
+    Double originalScore = multiPlayerTeamScore(pTeam);
 
-				if(teamDup.contains(p1)) {
-					teamDup.remove(p1);
-				} else {
-					teamDup.add(p1);
-				}
-				Double scoreRetry = multiPlayerTeamScore(teamDup);
-				if(scoreRetry >= originalScore) {
-					return true;
-				} else {
-					return false;
-				}
-			}
-		}
-		
-		return null;
-	}
+    if (modified.contains(p1)) {
+        modified.remove(p1);
+    } else {
+        modified.add(p1);
+    }
+
+    Double newScore = multiPlayerTeamScore(modified);
+
+    return newScore > originalScore;
+}
 	
 	public Integer firstSingleAddedImprovement(Team pTeam) { //done and marked
 		// PRE: -
@@ -294,172 +290,168 @@ public class TeamChoose {
 	// CREDIT / DISTINCTION
 	
 
-	public Team localSearchFirst(Team initTeam) { //done and marked
-		// PRE: -
-		// POST: Returns the team defined according to the localSearch pseudocode,
-		//       starting from team initTeam as T_1
-		//       choosing p_i, p_j to be the first (lowest ID) players 
-		//       that improve the score
-		
-		// TODO
-		Team startingTeam = initTeam;		
-		
-		
-		boolean flag = false;
-		do{
-			Integer firstAddBestId = firstSingleAddedImprovement(startingTeam);
-			Integer firstRemBestId = firstSingleRemovedImprovement(startingTeam);
-			if((firstAddBestId==null) && (firstRemBestId==null)) {
-				flag = true;
-			}
-			if(firstAddBestId != null) {
-				startingTeam.add(firstAddBestId);
-			}
-			if(firstRemBestId != null) {
-				startingTeam.remove(firstRemBestId);
-			}
-			
-			
-		} while(flag);
-		
-		return startingTeam;
-	}
+public Team localSearchFirst(Team initTeam) {
+    Team currentTeam = new Team();
+    currentTeam.addAll(initTeam);
 
-	public Integer bestSingleAddedImprovement(Team pTeam) { // done and marked
-		// PRE: pTeam contains one or more valid player IDs
-		// POST: If pTeam can be improved by adding any single player p1 not in pTeam,
-		//                return the p1 that leads to the largest improvement (with the smallest p1 in case of ties)
-		//       otherwise (i.e., if pTeam cannot be improved by adding any players),
-		//                return null
-		
-		// TODO
-		Integer bestPlayer = null;
-		if (pTeam != null && pTeam.size() >= 1) {
-			Double initScore = multiPlayerTeamScore(pTeam);
-			Double bestImprovement = 0.0;
-			for(Integer player: allPlayerTeam()) {
-				if(!pTeam.contains(player)) {
-					Team teamDupe = new Team();
-					teamDupe.addAll(pTeam);
-					teamDupe.add(player);
-					Double newScore = multiPlayerTeamScore(teamDupe);
-					Double improvement = newScore - initScore;
-						if(improvement > bestImprovement) {
-							bestImprovement = improvement;
-							bestPlayer = player;
-						}
-						else if(improvement == bestImprovement && player < bestPlayer) {
-							bestPlayer = player;
-						}
-				}
-			}
-		}
-		return bestPlayer;
-	}
+    boolean improved;
 
-	public Integer bestSingleRemovedImprovement(Team pTeam) { //done and marked
-		// PRE: pTeam contains one or more valid player IDs
-		// POST: If pTeam can be improved by removing any single player p1 in pTeam,
-		//                return the p1 that leads to the largest improvement (with the smallest p1 in case of ties)
-		//       otherwise (i.e., if pTeam cannot be improved by removing any players),
-		//                return null
-		
-		// TODO
-		
-		Integer bestPlayer = null;
-		if (pTeam != null && pTeam.size() >= 1) {
-			Double initScore = multiPlayerTeamScore(pTeam);
-			Double bestImprovement = 0.0;
-			for(Integer player: pTeam) {
-					Team teamDupe = new Team();
-					teamDupe.addAll(pTeam);
-					teamDupe.remove(player);
-					Double newScore = multiPlayerTeamScore(teamDupe);
-					Double improvement = newScore - initScore;
-						if(improvement > bestImprovement) {
-							bestImprovement = improvement;
-							bestPlayer = player;
-						}
-						else if(improvement == bestImprovement && player < bestPlayer) {
-							bestPlayer = player;
-						}
-				
-			}
-		}
-		return bestPlayer;
-	}
+    do {
+        improved = false;
+
+        Integer playerToAdd = firstSingleAddedImprovement(currentTeam);
+        if (playerToAdd != null) {
+            currentTeam.add(playerToAdd);
+            improved = true;
+        }
+
+        Integer playerToRemove = firstSingleRemovedImprovement(currentTeam);
+        if (playerToRemove != null) {
+            currentTeam.remove(playerToRemove);
+            improved = true;
+        }
+
+    } while (improved);
+
+    return currentTeam;
+}
+
+public Integer bestSingleAddedImprovement(Team pTeam) {
+    Integer bestPlayer = null;
+    Double bestImprovement = 0.0;
+    Double currentScore = multiPlayerTeamScore(pTeam);
+
+    for (Integer player : allPlayerTeam()) {
+        if (!pTeam.contains(player)) {
+            Team testTeam = new Team();
+            testTeam.addAll(pTeam);
+            testTeam.add(player);
+
+            Double improvement = multiPlayerTeamScore(testTeam) - currentScore;
+
+            if (improvement > bestImprovement) {
+                bestImprovement = improvement;
+                bestPlayer = player;
+            } else if (improvement > 0.0 && improvement.equals(bestImprovement)
+                    && (bestPlayer == null || player < bestPlayer)) {
+                bestPlayer = player;
+            }
+        }
+    }
+
+    return bestPlayer;
+}
+
+public Integer bestSingleRemovedImprovement(Team pTeam) {
+    Integer bestPlayer = null;
+    Double bestImprovement = 0.0;
+    Double currentScore = multiPlayerTeamScore(pTeam);
+
+    for (Integer player : pTeam) {
+        Team testTeam = new Team();
+        testTeam.addAll(pTeam);
+        testTeam.remove(player);
+
+        Double improvement = multiPlayerTeamScore(testTeam) - currentScore;
+
+        if (improvement > bestImprovement) {
+            bestImprovement = improvement;
+            bestPlayer = player;
+        } else if (improvement > 0.0 && improvement.equals(bestImprovement)
+                && (bestPlayer == null || player < bestPlayer)) {
+            bestPlayer = player;
+        }
+    }
+
+    return bestPlayer;
+}
 
 
-	public Team localSearchBest(Team initTeam) {
-		// PRE: -
-		// POST: Returns the team defined according to the localSearch pseudocode,
-		//       starting from team initTeam as T_1
-		//       choosing p_i, p_j to be the best players 
-		//       that improve the score
+public Team localSearchBest(Team initTeam) {
+    Team currentTeam = new Team();
+    currentTeam.addAll(initTeam);
 
-		// TODO
-		
-		Team currentTeam = initTeam;
-		Integer flag = 0;
-		while(flag==0){
-			Integer playerToAdd = bestSingleAddedImprovement(currentTeam);
-			Integer playerToRemove = bestSingleRemovedImprovement(currentTeam);
+    boolean improved;
 
-			if (playerToAdd == null && playerToRemove == null) {
-				flag = 1;
-			}
+    do {
+        improved = false;
 
-			if (playerToAdd != null) {
-				currentTeam.add(playerToAdd);
-			}
+        Integer playerToAdd = bestSingleAddedImprovement(currentTeam);
+        if (playerToAdd != null) {
+            currentTeam.add(playerToAdd);
+            improved = true;
+        }
 
-			if (playerToRemove != null) {
-				currentTeam.remove(playerToRemove);
-			}
-		} 
+        Integer playerToRemove = bestSingleRemovedImprovement(currentTeam);
+        if (playerToRemove != null) {
+            currentTeam.remove(playerToRemove);
+            improved = true;
+        }
 
-		return currentTeam;
-	}
+    } while (improved);
+
+    return currentTeam;
+}
 	
 	// (HIGH) DISTINCTION
 
-	public Team guaranteedBestTeam() {
-		// PRE: -
-		// POST: Returns the team containing player 0
-		//       that results in the best possible score
-		
-		// TODO
-		
-		Team pTeam = new Team();
-		pTeam.add(0);
+private Integer lowestOverallPlayerID() {
+    return Collections.min(playerGraph.keySet());
+}
 
-		while(true){
-			Integer nextBestPlayer = bestSingleAddedImprovement(pTeam);
-			if(nextBestPlayer==null) break;
-			pTeam.add(nextBestPlayer);
-		}
-		return pTeam;
-	}
+private Team canonicalTeam(Team pTeam) {
+    Team chosenTeam = testWithLowestID(pTeam);
+    Team canonical = new Team();
+    canonical.addAll(chosenTeam);
+    return canonical;
+}
+
+private void searchBestTeam(Vector<Integer> players, int index, Team currentTeam) {
+    if (index == players.size()) {
+        Integer lowestPlayer = lowestOverallPlayerID();
+        if (!currentTeam.contains(lowestPlayer)) {
+            return;
+        }
+
+        Double score = multiPlayerTeamScore(currentTeam);
+
+        if (bestTeamFound == null || score > bestTeamScore) {
+            bestTeamScore = score;
+            bestTeamFound = canonicalTeam(currentTeam);
+        }
+        return;
+    }
+
+    Integer player = players.get(index);
+
+    currentTeam.add(player);
+    searchBestTeam(players, index + 1, currentTeam);
+
+    currentTeam.remove(player);
+    searchBestTeam(players, index + 1, currentTeam);
+}
+
+public Team guaranteedBestTeam() {
+    Vector<Integer> players = new Vector<Integer>();
+    players.addAll(allPlayerTeam());
+
+    bestTeamFound = null;
+    bestTeamScore = Double.NEGATIVE_INFINITY;
+
+    Team currentTeam = new Team();
+    searchBestTeam(players, 0, currentTeam);
+
+    return bestTeamFound;
+}
 	
-	public Boolean optimalLocalSearchBest(Team t) {
-		// PRE: -
-		// POST: If localSearchBest() applied to Team t gives the same team split as guaranteedBestTeam(),
-		//          return true
-		//       otherwise return false
-		
-		// TODO
-		Team localRes = localSearchBest(t);
-		Team localResOther = otherTeam(localRes);
-		Team bestTeamRes = guaranteedBestTeam();
-		Team besTeamResOther = otherTeam(bestTeamRes);
-		if(localRes.equals(bestTeamRes) && localResOther.equals(besTeamResOther)) {
-			return true;
-		} else{
-			return false;
-		}
-		
-		
-	}
+public Boolean optimalLocalSearchBest(Team t) {
+    Team localResult = localSearchBest(t);
+    Team localNormalized = canonicalTeam(localResult);
+
+    Team bestResult = guaranteedBestTeam();
+
+    return localNormalized.equals(bestResult);
+}
 	
 	
 	public static void main(String[] args) {
