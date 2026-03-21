@@ -3,6 +3,7 @@ package com.matchmaking.api;
 import com.matchmaking.api.dto.*;
 import com.matchmaking.api.service.MatchmakingService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -11,17 +12,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Verifies the service layer against the known sample data.
- *
- * Sample data (from the assignment):
- *   0-1(2.0)  0-2(1.0)  0-4(4.0)
- *   1-2(3.0)  1-6(5.0)  2-3(2.0)
- *   2-5(1.0)  2-6(2.0)  3-5(3.0)  4-5(1.0)
- *
- * Known results:
- *   guaranteedBestTeam     → {0,2,5,6}, score 20.0
- *   localSearchBest({0,5}) → {0,2,5,6}, score 20.0
- *   localSearchFirst({1,3,5}) → {0,1,5}, score 18.0
  */
+@DisplayName("Service Layer")
 class MatchmakingServiceTest {
 
     private MatchmakingService service;
@@ -30,7 +22,6 @@ class MatchmakingServiceTest {
     void setUp() {
         service = new MatchmakingService();
 
-        // Load the sample graph
         GraphInputDto graph = new GraphInputDto(List.of(
                 new EdgeDto(0, 1, 2.0),
                 new EdgeDto(0, 2, 1.0),
@@ -47,6 +38,7 @@ class MatchmakingServiceTest {
     }
 
     @Test
+    @DisplayName("Guaranteed Best finds optimal score 20")
     void guaranteedBestTeam_findsOptimalSplit() {
         RunRequestDto req = new RunRequestDto();
         req.setAlgorithm("guaranteedBestTeam");
@@ -59,6 +51,7 @@ class MatchmakingServiceTest {
     }
 
     @Test
+    @DisplayName("Local Search Best from {0,5} finds optimal")
     void localSearchBest_fromGoodStart_findsOptimal() {
         RunRequestDto req = new RunRequestDto();
         req.setAlgorithm("localSearchBest");
@@ -71,6 +64,7 @@ class MatchmakingServiceTest {
     }
 
     @Test
+    @DisplayName("Local Search First from {1,3,5} finds local optimum 18")
     void localSearchFirst_fromDifferentStart_findsLocalOptimum() {
         RunRequestDto req = new RunRequestDto();
         req.setAlgorithm("localSearchFirst");
@@ -83,6 +77,7 @@ class MatchmakingServiceTest {
     }
 
     @Test
+    @DisplayName("Compare returns all 3 algorithm results")
     void compareAll_returnsThreeResults() {
         CompareResultDto result = service.compareAll(List.of(0, 5));
 

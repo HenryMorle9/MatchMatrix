@@ -1,148 +1,176 @@
 package com.matchmaking.algorithms;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 /**
- * Provided unit tests for the assignment.
- * These tests exercise the graph-building code, the scoring functions, and the
- * search methods against the sample input file.
+ * Unit tests for the core algorithm classes.
+ * Uses the assignment sample data (7 players, 10 edges, known optimal score = 20).
  */
+@DisplayName("Core Algorithms")
 public class SampleTests {
 
-    /**
-     * Points to the sample data supplied with the assignment framework.
-     * Update this path when running the tests on a different machine.
-     */
-    String PATH = "C:/Users/henry/eclipse-workspace-2010-round-2/FPSMatch2022Framework/";
-    String SAMPLEFILE = PATH + "Assignment-2-sample-data.txt";
+    private TeamChoose allTeams;
+
+    @BeforeEach
+    void setUp() {
+        allTeams = new TeamChoose();
+        allTeams.setPlayerGraph(sampleData());
+    }
+
+    private Vector<DataRow> sampleData() {
+        Vector<DataRow> data = new Vector<>();
+        data.add(new DataRow(0, 1, 2.0));
+        data.add(new DataRow(0, 2, 1.0));
+        data.add(new DataRow(0, 4, 4.0));
+        data.add(new DataRow(1, 2, 3.0));
+        data.add(new DataRow(1, 6, 5.0));
+        data.add(new DataRow(2, 3, 2.0));
+        data.add(new DataRow(2, 5, 1.0));
+        data.add(new DataRow(2, 6, 2.0));
+        data.add(new DataRow(3, 5, 3.0));
+        data.add(new DataRow(4, 5, 1.0));
+        return data;
+    }
+
+    // === PastPlayDeets ===
 
     @Test
-    public void testPastPlayA() {
-        PastPlayDeets somePlayerHist = new PastPlayDeets();
-
-        somePlayerHist.insertPlayerScore(2, 3.5);
-        somePlayerHist.insertPlayerScore(3, 4.0);
-
-        assertEquals(Double.valueOf(3.5), somePlayerHist.getPlayerScore(2));
+    @DisplayName("Get player score")
+    void testPastPlayA() {
+        PastPlayDeets hist = new PastPlayDeets();
+        hist.insertPlayerScore(2, 3.5);
+        hist.insertPlayerScore(3, 4.0);
+        assertEquals(Double.valueOf(3.5), hist.getPlayerScore(2));
     }
 
     @Test
-    public void testPastPlayB() {
-        PastPlayDeets somePlayerHist = new PastPlayDeets();
-
-        somePlayerHist.insertPlayerScore(2, 3.5);
-        somePlayerHist.insertPlayerScore(3, 4.0);
-
-        assertEquals(Double.valueOf(7.5), somePlayerHist.getPlayerScoreTota());
+    @DisplayName("Get total score")
+    void testPastPlayB() {
+        PastPlayDeets hist = new PastPlayDeets();
+        hist.insertPlayerScore(2, 3.5);
+        hist.insertPlayerScore(3, 4.0);
+        assertEquals(Double.valueOf(7.5), hist.getPlayerScoreTota());
     }
 
     @Test
-    public void testPastPlayC() {
-        PastPlayDeets somePlayerHist = new PastPlayDeets();
-        Set<Integer> s = new TreeSet<Integer>(Arrays.asList(2, 3));
-
-        somePlayerHist.insertPlayerScore(2, 3.5);
-        somePlayerHist.insertPlayerScore(3, 4.0);
-
-        assertEquals(s, somePlayerHist.listPastPlayers());
+    @DisplayName("List past players")
+    void testPastPlayC() {
+        PastPlayDeets hist = new PastPlayDeets();
+        hist.insertPlayerScore(2, 3.5);
+        hist.insertPlayerScore(3, 4.0);
+        Set<Integer> expected = new TreeSet<>(Arrays.asList(2, 3));
+        assertEquals(expected, hist.listPastPlayers());
     }
 
     @Test
-    public void testPastPlayD() {
-        PastPlayDeets somePlayerHist = new PastPlayDeets();
+    @DisplayName("Lowest ID played with")
+    void testPastPlayD() {
+        PastPlayDeets hist = new PastPlayDeets();
+        hist.insertPlayerScore(2, 3.5);
+        hist.insertPlayerScore(3, 4.0);
+        assertEquals(Integer.valueOf(2), hist.hasPlayedWithLowestID());
+    }
 
-        somePlayerHist.insertPlayerScore(2, 3.5);
-        somePlayerHist.insertPlayerScore(3, 4.0);
+    // === Graph queries ===
 
-        assertEquals(Integer.valueOf(2), somePlayerHist.hasPlayedWithLowestID());
+    @Test
+    @DisplayName("Player 0 score with player 4 is 4.0")
+    void testGetPlayerDetails() {
+        assertEquals(Double.valueOf(4.0), allTeams.getPlayerDetails(0).getPlayerScore(4));
     }
 
     @Test
-    public void testGetPlayerDetails() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(Double.valueOf(4.0), allTeams.getPlayerDetails(0).getPlayerScore(4));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
+    @DisplayName("Player 0 lowest ID opponent is 1")
+    void testHasPlayedWithLowestID() {
+        assertEquals(Integer.valueOf(1), allTeams.hasPlayedWithLowestID(0));
     }
 
     @Test
-    public void testHasPlayedWithLowestID() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(Integer.valueOf(1), allTeams.hasPlayedWithLowestID(0));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
+    @DisplayName("Player 0 played with {1, 2, 4}")
+    void testHasPlayedWithAll() {
+        Team expected = new Team();
+        expected.add(1);
+        expected.add(2);
+        expected.add(4);
+        assertEquals(expected, allTeams.hasPlayedWithAll(0));
     }
 
     @Test
-    public void testHasPlayedWithAll() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
+    @DisplayName("Score between 0 and 4 is 4.0")
+    void testScoreBetween() {
+        assertEquals(Double.valueOf(4.0), allTeams.scoreBetween(0, 4));
+    }
+
+    @Test
+    @DisplayName("Player 1 total cross-team score is 10.0")
+    void testSinglePlayerTeamScore() {
+        assertEquals(Double.valueOf(10.0), allTeams.singlePlayerTeamScore(1));
+    }
+
+    // === Team operations ===
+
+    @Test
+    @DisplayName("Other team of {0,3} is {1,2,4,5,6}")
+    void testOtherTeam() {
+        Team startT = new Team();
+        startT.add(0);
+        startT.add(3);
+        Team expected = new Team();
+        expected.add(1);
+        expected.add(2);
+        expected.add(4);
+        expected.add(5);
+        expected.add(6);
+        assertEquals(expected, allTeams.otherTeam(startT));
+    }
+
+    @Test
+    @DisplayName("Team {1,3,5} score is 14.0")
+    void testMultiPlayerTeamScore() {
         Team t = new Team();
         t.add(1);
-        t.add(2);
-        t.add(4);
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(t, allTeams.hasPlayedWithAll(0));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
+        t.add(3);
+        t.add(5);
+        assertEquals(Double.valueOf(14.0), allTeams.multiPlayerTeamScore(t));
     }
 
     @Test
-    public void testScoreBetween() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(Double.valueOf(4.0), allTeams.scoreBetween(0, 4));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
+    @DisplayName("Lowest ID in {1,3,5,6} is 1")
+    void testLowestIDOnTeam() {
+        Team t = new Team();
+        t.add(1);
+        t.add(3);
+        t.add(5);
+        t.add(6);
+        assertEquals(Integer.valueOf(1), allTeams.lowestIDOnTeam(t));
     }
 
     @Test
-    public void testSinglePlayerTeamScore() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(Double.valueOf(10.0), allTeams.singlePlayerTeamScore(1));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
+    @DisplayName("All players team has 7 members")
+    void testAllPlayerTeam() {
+        Team expected = new Team();
+        expected.add(0);
+        expected.add(1);
+        expected.add(2);
+        expected.add(3);
+        expected.add(4);
+        expected.add(5);
+        expected.add(6);
+        assertEquals(expected, allTeams.allPlayerTeam());
     }
 
     @Test
-    public void testOtherTeam() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
+    @DisplayName("Canonical team contains lowest ID")
+    void testTeamT1() {
         Team startT = new Team();
         startT.add(0);
         startT.add(3);
@@ -152,283 +180,117 @@ public class SampleTests {
         answerT.add(4);
         answerT.add(5);
         answerT.add(6);
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(answerT, allTeams.otherTeam(startT));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
+        assertEquals(startT, allTeams.testWithLowestID(answerT));
     }
 
+    // === Improvement detection ===
+
     @Test
-    public void testMultiPlayerTeamScore() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
+    @DisplayName("Adding 6 to {1,3,5} is not better")
+    void testIsBetterA() {
         Team t = new Team();
         t.add(1);
         t.add(3);
         t.add(5);
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(Double.valueOf(14.0), allTeams.multiPlayerTeamScore(t));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
+        assertFalse(allTeams.isBetter(t, 6));
     }
 
     @Test
-    public void testLowestIDOnTeam() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
+    @DisplayName("Removing 6 from {1,3,5,6} is better")
+    void testIsBetterB() {
         Team t = new Team();
         t.add(1);
         t.add(3);
         t.add(5);
         t.add(6);
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(Integer.valueOf(1), allTeams.lowestIDOnTeam(t));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
+        assertTrue(allTeams.isBetter(t, 6));
     }
 
     @Test
-    public void testAllPlayerTeam() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
-        Team t = new Team();
-        t.add(0);
-        t.add(1);
-        t.add(2);
-        t.add(3);
-        t.add(4);
-        t.add(5);
-        t.add(6);
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(t, allTeams.allPlayerTeam());
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
-    }
-
-    @Test
-    public void testTeamT1() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
-        Team startT = new Team();
-        startT.add(0);
-        startT.add(3);
-        Team answerT = new Team();
-        answerT.add(1);
-        answerT.add(2);
-        answerT.add(4);
-        answerT.add(5);
-        answerT.add(6);
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(startT, allTeams.testWithLowestID(answerT));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
-    }
-
-    @Test
-    public void testIsBetterA() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
+    @DisplayName("First add improvement for {1,3,5} is player 0")
+    void testFirstSingleAddedImprovement() {
         Team t = new Team();
         t.add(1);
         t.add(3);
         t.add(5);
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertFalse(allTeams.isBetter(t, 6));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
+        assertEquals(Integer.valueOf(0), allTeams.firstSingleAddedImprovement(t));
     }
 
     @Test
-    public void testIsBetterB() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
+    @DisplayName("First remove improvement for {1,3,5} is player 3")
+    void testFirstSingleRemovedImprovement() {
+        Team t = new Team();
+        t.add(1);
+        t.add(3);
+        t.add(5);
+        assertEquals(Integer.valueOf(3), allTeams.firstSingleRemovedImprovement(t));
+    }
+
+    @Test
+    @DisplayName("Best add improvement for {3,5} is player 1")
+    void testBestSingleAddedImprovement() {
+        Team t = new Team();
+        t.add(3);
+        t.add(5);
+        assertEquals(Integer.valueOf(1), allTeams.bestSingleAddedImprovement(t));
+    }
+
+    @Test
+    @DisplayName("Best remove improvement for {1,3,5,6} is player 6")
+    void testBestSingleRemovedImprovement() {
         Team t = new Team();
         t.add(1);
         t.add(3);
         t.add(5);
         t.add(6);
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertTrue(allTeams.isBetter(t, 6));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
+        assertEquals(Integer.valueOf(6), allTeams.bestSingleRemovedImprovement(t));
     }
 
-    @Test
-    public void testFirstSingleAddedImprovement() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
-        Team t = new Team();
-        t.add(1);
-        t.add(3);
-        t.add(5);
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(Integer.valueOf(0), allTeams.firstSingleAddedImprovement(t));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
-    }
+    // === Search algorithms ===
 
     @Test
-    public void testFirstSingleRemovedImprovement() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
-        Team t = new Team();
-        t.add(1);
-        t.add(3);
-        t.add(5);
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(Integer.valueOf(3), allTeams.firstSingleRemovedImprovement(t));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
-    }
-
-    @Test
-    public void testLocalSearchFirst() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
+    @DisplayName("Local Search First from {0,5} finds {0,1,5}")
+    void testLocalSearchFirst() {
         Team startT = new Team();
         startT.add(0);
         startT.add(5);
-        Team answerT = new Team();
-        answerT.add(0);
-        answerT.add(1);
-        answerT.add(5);
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(answerT, allTeams.localSearchFirst(startT));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
+        Team expected = new Team();
+        expected.add(0);
+        expected.add(1);
+        expected.add(5);
+        assertEquals(expected, allTeams.localSearchFirst(startT));
     }
 
     @Test
-    public void testBestSingleAddedImprovement() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
-        Team t = new Team();
-        t.add(3);
-        t.add(5);
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(Integer.valueOf(1), allTeams.bestSingleAddedImprovement(t));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
-    }
-
-    @Test
-    public void testBestSingleRemovedImprovement() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
-        Team t = new Team();
-        t.add(1);
-        t.add(3);
-        t.add(5);
-        t.add(6);
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(Integer.valueOf(6), allTeams.bestSingleRemovedImprovement(t));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
-    }
-
-    @Test
-    public void testLocalSearchBest() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
+    @DisplayName("Local Search Best from {0,5} finds {0,2,5,6}")
+    void testLocalSearchBest() {
         Team startT = new Team();
         startT.add(0);
         startT.add(5);
-        Team answerT = new Team();
-        answerT.add(0);
-        answerT.add(2);
-        answerT.add(5);
-        answerT.add(6);
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(answerT, allTeams.localSearchBest(startT));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
+        Team expected = new Team();
+        expected.add(0);
+        expected.add(2);
+        expected.add(5);
+        expected.add(6);
+        assertEquals(expected, allTeams.localSearchBest(startT));
     }
 
     @Test
-    public void testGuaranteedBestTeam() {
-        TeamChoose allTeams = new TeamChoose();
-        Vector<DataRow> listOfDataRows;
-        Team answerT = new Team();
-        answerT.add(0);
-        answerT.add(2);
-        answerT.add(5);
-        answerT.add(6);
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertEquals(answerT, allTeams.guaranteedBestTeam());
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
+    @DisplayName("Guaranteed Best finds optimal {0,2,5,6}")
+    void testGuaranteedBestTeam() {
+        Team expected = new Team();
+        expected.add(0);
+        expected.add(2);
+        expected.add(5);
+        expected.add(6);
+        assertEquals(expected, allTeams.guaranteedBestTeam());
     }
 
     @Test
-    public void testOptimalLocalSearchBestA() {
-        TeamChoose allTeams = new TeamChoose();
+    @DisplayName("Local Search Best from {0} is optimal")
+    void testOptimalLocalSearchBestA() {
         Team tester = new Team();
         tester.add(0);
-        Vector<DataRow> listOfDataRows;
-
-        try {
-            listOfDataRows = allTeams.readWeightedFromFile(SAMPLEFILE);
-            allTeams.setPlayerGraph(listOfDataRows);
-            assertTrue(allTeams.optimalLocalSearchBest(tester));
-        } catch (IOException e) {
-            System.out.println("in exception: " + e);
-        }
+        assertTrue(allTeams.optimalLocalSearchBest(tester));
     }
-
 }
