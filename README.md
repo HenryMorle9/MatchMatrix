@@ -1,6 +1,6 @@
-# FPS Matchmaking Algorithm
+# MatchMatrix
 
-A full-stack team-balancing system that uses graph theory and combinatorial optimisation to split players into fair, competitive teams based on their historical play data.
+A full-stack team-balancing system that uses graph theory and combinatorial optimisation to split players into fair, competitive teams for First-Person Shooter games based on their historical play data.
 
 Players are modelled as nodes in a weighted undirected graph. Edge weights represent how well two players have performed together in the past. The system finds the team split that maximises cross-team synergy — placing players who work well together on **opposing** sides for a balanced match.
 
@@ -45,8 +45,8 @@ Three strategies are implemented, covering the full spectrum from fast heuristic
 
 | Algorithm | Strategy | Time Complexity | Finds Optimal? |
 |-----------|----------|-----------------|----------------|
-| `localSearchFirst` | Iteratively applies the **first** move that improves the score | O(n²) per iteration | No — local optimum |
-| `localSearchBest` | Iteratively applies the **best** move that improves the score | O(n²) per iteration | Often — better local optimum |
+| `localSearchFirst` | Iteratively applies the **first** move that improves the score | O(n²) | No — local optimum |
+| `localSearchBest` | Iteratively applies the **best** move that improves the score | O(n²) | Often — better local optimum |
 | `guaranteedBestTeam` | Exhaustive backtracking over all 2ⁿ splits | O(2ⁿ) | Yes — always |
 
 Both local search variants use add/remove moves: at each step, a single player is either added to or removed from the current team if it improves the cross-team score.
@@ -60,42 +60,29 @@ Both local search variants use add/remove moves: at each step, a single player i
 | Core algorithms | Java 17 |
 | REST API | Spring Boot |
 | Frontend | React + TypeScript (Vite) |
-| Graph visualisation | React Flow / vis-network |
-| Charts | Recharts |
+| Styling | Tailwind CSS |
+| Graph visualisation | Pure SVG + React |
 | Build | Maven (multi-module) |
-| Tests | JUnit 4 |
+| Tests | JUnit 5 + MockMvc |
 
 ---
 
-## Project Roadmap
+## Features
 
-### Phase 1 — Spring Boot REST API
-- [ ] Multi-module Maven setup
-- [ ] `POST /api/graph` — load player graph from JSON
-- [ ] `GET /api/graph` — return graph state (nodes + edges)
-- [ ] `POST /api/matchmaking/run` — run a single algorithm
-- [ ] `POST /api/matchmaking/compare` — run all algorithms, return results + runtimes
-- [ ] `POST /api/matchmaking/steps` — return intermediate states for animation
+### Landing Page
+Overview of the project with an interactive SVG graph preview explaining the core concepts — players, synergy scores, and team splits.
 
-### Phase 2 — React + TypeScript Frontend
-- [ ] Graph Builder — input player pairs manually or paste raw data
-- [ ] Matchmaking Dashboard — run algorithms, view team splits with scores
-- [ ] Inline "How It Works" guide on the dashboard
-- [ ] Algorithm Comparison page — side-by-side table of all three algorithms
+### Graph Builder
+Input player pairs and scores manually or generate random graphs. Shows a performance estimate for exhaustive search based on player count.
 
-### Phase 3 — Algorithm Showcase
-- [ ] **Comparison panel** — highlight best result, score deltas, optimality detection
-- [ ] **Step-by-step visualisation** — animated graph where nodes switch teams as the algorithm runs (play/pause/step controls)
-- [ ] **Performance benchmarking** — runtime charts across increasing player counts, showing exponential vs polynomial complexity
+### Dashboard
+Run a single algorithm with a chosen initial team. Includes loading state and cancel support via AbortController.
 
-### Phase 4 — Stretch Goals
-- [ ] **Branch and Bound** — smarter exhaustive search with early pruning; faster than brute-force without sacrificing optimality
-- [ ] **Score caching** — memoisation for repeated `multiPlayerTeamScore` calls during search
-- [ ] **Greedy heuristic** — assign players one at a time, always maximising current score
-- [ ] **Simulated Annealing** — escapes local optima by occasionally accepting worse moves
-- [ ] **Genetic Algorithm** — population-based search, naturally parallelisable
-- [ ] **Bitmasking** — represent teams as integer bitmasks for faster set operations
-- [ ] **Machine-Learning-guided initial team** *(mega-stretch)* — train a model on optimal splits to predict a warm start for local search
+### Compare
+Runs all three algorithms side by side. Highlights the **Most Accurate** (green badge) and **Fastest** (blue badge) results.
+
+### Visualise
+Step-by-step algorithm animation with an SVG graph. Nodes are coloured by team (blue vs red) and update as the algorithm progresses. Playback controls: play/pause, step forward/backward, reset, and skip to end. Includes a step history table.
 
 ---
 
@@ -131,16 +118,9 @@ One pairing per line. Player IDs are zero-indexed integers. Scores are real-valu
 
 - Java 17+
 - Maven 3.8+
-- Node.js 18+ *(for the frontend, once Phase 2 is underway)*
+- Node.js 18+
 
-### Run the core algorithms (current state)
-
-```bash
-cd Matchmaking-Algorithm
-mvn test
-```
-
-### Run the full stack *(once Phase 1 & 2 are complete)*
+### Run the full stack
 
 ```bash
 # Backend
@@ -153,19 +133,38 @@ npm install
 npm run dev
 ```
 
+### Run the tests
+
+```bash
+# Algorithm unit tests
+cd matchmaking-algorithms
+mvn test
+
+# API integration tests
+cd matchmaking-api
+mvn test
+```
+
 ---
 
 ## Project Structure
 
 ```
 Matchmaking-Algorithm-Project/
-├── Matchmaking-Algorithm/         # Java core — graph model + all algorithms
-│   └── student/
+├── matchmaking-algorithms/        # Java core — graph model + all algorithms
+│   └── src/main/java/com/matchmaking/algorithms/
 │       ├── DataRow.java           # Input row: (p1, p2, score)
 │       ├── PastPlayDeets.java     # Per-player adjacency list + history
 │       ├── Team.java              # Team as a sorted set of player IDs
-│       ├── TeamChoose.java        # All algorithm logic
-│       └── SampleTests.java       # JUnit test suite
-├── matchmaking-api/               # Spring Boot REST API (Phase 1)
-└── matchmaking-ui/                # React + TypeScript frontend (Phase 2)
+│       └── TeamChoose.java        # All algorithm logic (includes WithSteps variants)
+├── matchmaking-api/               # Spring Boot REST API
+│   └── src/main/java/com/matchmaking/api/
+│       ├── controller/            # GraphController, MatchmakingController
+│       ├── service/               # MatchmakingService
+│       └── dto/                   # EdgeDto, GraphInputDto, StepDto, etc.
+└── matchmaking-ui/                # React + TypeScript frontend
+    └── src/
+        ├── api/                   # API client with AbortSignal support
+        ├── pages/                 # Landing, GraphBuilder, Dashboard, Compare, Visualise
+        └── App.tsx                # Router + nav bar
 ```

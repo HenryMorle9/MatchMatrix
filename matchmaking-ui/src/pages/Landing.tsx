@@ -1,29 +1,5 @@
 import { Link } from "react-router-dom";
 
-const heroStats = [
-  {
-    value: "3",
-    label: "Search Modes",
-    detail:
-      "Compare first improvement, best improvement, and exhaustive search.",
-  },
-  {
-    value: "O(n²)",
-    label: "Local Search Pace",
-    detail: "Fast iterative optimisation for larger player graphs.",
-  },
-  {
-    value: "2^n",
-    label: "Exhaustive Benchmark",
-    detail: "Ground-truth optimum used to measure search quality.",
-  },
-  {
-    value: "Live",
-    label: "Step Replay",
-    detail: "Inspect every move with a graph visualiser and runtime trace.",
-  },
-];
-
 const workflowCards = [
   {
     title: "Graph Builder",
@@ -55,17 +31,38 @@ const workflowCards = [
   },
 ];
 
+const previewCards = [
+  {
+    label: "Players",
+    title: "Each circle is a player",
+    description:
+      "Every node is a player in the lobby waiting to be sorted into one of two teams.",
+  },
+  {
+    label: "Connections",
+    title: "Lines are synergy scores",
+    description:
+      "Each edge carries a weight based on how well two players have performed together in past matches.",
+  },
+  {
+    label: "Team Split",
+    title: "Colours show the split",
+    description:
+      "Blue and red mark opposite teams. The algorithm places high-synergy players on opposing sides for a balanced match.",
+  },
+];
+
 const algorithmCards = [
   {
     name: "Local Search (First)",
-    complexity: "O(n²) per iteration",
+    complexity: "O(n²)",
     summary:
       "Takes the first improving move it finds, making it quick and intuitive to trace.",
     accentColor: "#7dd3fc",
   },
   {
     name: "Local Search (Best)",
-    complexity: "O(n²) per iteration",
+    complexity: "O(n²)",
     summary:
       "Evaluates every one-step improvement and chooses the strongest move available.",
     accentColor: "#67e8f9",
@@ -115,30 +112,29 @@ const spotlightEdges = [
 export default function Landing() {
   return (
     <div className="theme-page theme-home space-y-10">
-      <section className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
-        <div className="space-y-6">
+      <section className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+        <div className="space-y-10">
           <p className="theme-kicker">
             Portfolio Project • Graph Search • FPS Team Balance
           </p>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             <h1 className="theme-title">MatchMatrix</h1>
             <p className="max-w-4xl text-3xl font-semibold leading-tight text-white sm:text-4xl">
-              A hands-on way to explore how team-balancing algorithms work.
+              A hands-on way to explore how team-balancing algorithms work in
+              First-Person Shooter games.
             </p>
 
             <p className="theme-subtitle">
-              <p className="theme-subtitle">
-                MatchMatrix is a technical full-stack portfolio app built on top
-                of a data structures and algorithms project I originally started
-                while learning about graphs. I later expanded it into a sandbox
-                for exploring new DSA concepts, applying them to matchmaking
-                problems, and visualising the results.
-              </p>
+              MatchMatrix is a technical full-stack portfolio app built on top
+              of a data structures and algorithms project I originally started
+              while learning about graphs. I later expanded it into a sandbox
+              for exploring new DSA concepts, applying them to matchmaking
+              problems, and visualising the results.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-4">
             <Link
               to="/graph-builder"
               className="theme-btn-primary px-5 py-3 text-sm"
@@ -158,32 +154,18 @@ export default function Landing() {
               Compare Algorithms
             </Link>
           </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {heroStats.map((stat) => (
-              <div
-                key={stat.label}
-                className="theme-home-metric rounded-2xl p-4"
-              >
-                <p className="text-3xl font-bold text-white">{stat.value}</p>
-                <p className="theme-label mt-3">{stat.label}</p>
-                <p className="theme-note mt-2 text-sm leading-6">
-                  {stat.detail}
-                </p>
-              </div>
-            ))}
-          </div>
         </div>
 
         <div className="theme-panel theme-home-stage rounded-[30px] p-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="theme-section-title">System Overview</p>
+              <p className="theme-section-title">Quick Preview</p>
               <p className="mt-2 text-xl font-semibold text-white">
-                Interactive matchmaking analysis from graph to answer.
+                See how MatchMatrix turns a group of players into two possible
+                teams.
               </p>
             </div>
-            <span className="theme-home-tag">Live Tooling</span>
+            <span className="theme-home-tag">Visual Guide</span>
           </div>
 
           <div className="mt-6 grid gap-4">
@@ -238,33 +220,18 @@ export default function Landing() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
-              <div className="theme-panel-subtle rounded-2xl p-4">
-                <p className="theme-label">Input</p>
-                <p className="mt-2 text-lg font-semibold text-white">
-                  Weighted Player Graphs
-                </p>
-                <p className="theme-note mt-2 text-sm">
-                  Pairwise compatibility drives every team split decision.
-                </p>
-              </div>
-              <div className="theme-panel-subtle rounded-2xl p-4">
-                <p className="theme-label">Analysis</p>
-                <p className="mt-2 text-lg font-semibold text-white">
-                  Score + Runtime
-                </p>
-                <p className="theme-note mt-2 text-sm">
-                  Benchmark search quality and execution cost in one place.
-                </p>
-              </div>
-              <div className="theme-panel-subtle rounded-2xl p-4">
-                <p className="theme-label">Replay</p>
-                <p className="mt-2 text-lg font-semibold text-white">
-                  Move-by-Move Visuals
-                </p>
-                <p className="theme-note mt-2 text-sm">
-                  Step tracing explains how each team configuration evolved.
-                </p>
-              </div>
+              {previewCards.map((card) => (
+                <div
+                  key={card.label}
+                  className="theme-panel-subtle rounded-2xl p-4"
+                >
+                  <p className="theme-label">{card.label}</p>
+                  <p className="mt-2 text-lg font-semibold text-white">
+                    {card.title}
+                  </p>
+                  <p className="theme-note mt-2 text-sm">{card.description}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -274,12 +241,8 @@ export default function Landing() {
         <div className="max-w-3xl">
           <p className="theme-section-title">Core Workflows</p>
           <h2 className="mt-3 text-3xl font-bold text-white">
-            Each page tells a different part of the algorithm story.
+            From graph to replay in four steps.
           </h2>
-          <p className="theme-note mt-3 text-base leading-7">
-            The product flow is designed to move from raw graph construction to
-            measurable algorithm output and then into explainable visual replay.
-          </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -307,7 +270,7 @@ export default function Landing() {
         <div className="theme-panel rounded-[28px] p-6">
           <p className="theme-section-title">Algorithms</p>
           <h2 className="mt-3 text-3xl font-bold text-white">
-            Three ways to search for the strongest team split.
+            The various approaches to search for the strongest team split.
           </h2>
           <div className="mt-6 grid gap-4">
             {algorithmCards.map((card) => (
@@ -349,49 +312,12 @@ export default function Landing() {
           <div className="theme-panel-subtle mt-6 rounded-[22px] p-5">
             <p className="theme-label">Why It Matters</p>
             <p className="theme-note mt-3 text-sm leading-7">
-              MatchMatrix makes the tradeoff between speed and optimality
-              visible. It gives you a way to explain the data structures,
-              algorithm choices, and measured outcomes in one coherent product.
+              MatchMatrix makes the tradeoff between speed and optimality visible — demonstrating data structures, algorithm design, and measured outcomes in one coherent product.
             </p>
           </div>
         </div>
       </section>
 
-      <section className="theme-panel rounded-[32px] p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="theme-section-title">Launch Sequence</p>
-            <h2 className="mt-3 text-4xl font-bold text-white">
-              Open the toolchain and start exploring how the search behaves.
-            </h2>
-            <p className="theme-note mt-3 text-base leading-7">
-              Jump straight into graph construction, inspect a single run, or
-              use the visualiser when you want the algorithm to explain itself.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <Link
-              to="/graph-builder"
-              className="theme-btn-primary px-5 py-3 text-sm"
-            >
-              Build A Graph
-            </Link>
-            <Link
-              to="/dashboard"
-              className="theme-btn-secondary px-5 py-3 text-sm"
-            >
-              Open Dashboard
-            </Link>
-            <Link
-              to="/design-lab"
-              className="theme-btn-secondary px-5 py-3 text-sm"
-            >
-              View Design Lab
-            </Link>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
