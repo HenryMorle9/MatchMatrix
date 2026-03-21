@@ -2,6 +2,7 @@ package com.matchmaking.api.controller;
 
 import com.matchmaking.api.dto.CompareResultDto;
 import com.matchmaking.api.dto.RunRequestDto;
+import com.matchmaking.api.dto.StepsResultDto;
 import com.matchmaking.api.dto.TeamResultDto;
 import com.matchmaking.api.service.MatchmakingService;
 import jakarta.validation.Valid;
@@ -30,6 +31,15 @@ public class MatchmakingController {
             return ResponseEntity.badRequest().build();
         }
         TeamResultDto result = matchmakingService.runAlgorithm(request);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/steps")
+    public ResponseEntity<StepsResultDto> steps(@Valid @RequestBody RunRequestDto request) {
+        if (!matchmakingService.isGraphLoaded()) {
+            return ResponseEntity.badRequest().build();
+        }
+        StepsResultDto result = matchmakingService.runWithSteps(request);
         return ResponseEntity.ok(result);
     }
 

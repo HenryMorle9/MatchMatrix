@@ -111,6 +111,71 @@ public class MatchmakingService {
     }
 
     /**
+     * Runs a local search algorithm and returns every intermediate team state.
+     * Only localSearchFirst and localSearchBest support step-by-step mode.
+     */
+    public StepsResultDto runWithSteps(RunRequestDto request) {
+        Team initTeam = toTeam(request.getInitialTeam());
+
+        long start = System.currentTimeMillis();
+        List<List<Integer>> rawSteps;
+
+        switch (request.getAlgorithm()) {
+            case "localSearchFirst":
+                rawSteps = teamChoose.localSearchFirstWithSteps(initTeam);
+                break;
+            case "localSearchBest":
+                rawSteps = teamChoose.localSearchBestWithSteps(initTeam);
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Step-by-step mode only supports localSearchFirst and localSearchBest");
+        }
+
+        long elapsed = System.currentTimeMillis() - start;
+
+        List<StepDto> steps = new ArrayList<>();
+        List<Integer> previousTeam = null;
+
+        for (int i = 0; i < rawSteps.size(); i++) {
+            List<Integer> teamIds = rawSteps.get(i);
+            Team team = toTeam(teamIds);
+            Team canonical = teamChoose.testWithLowestID(team);
+            Team opposing = teamChoose.otherTeam(canonical);
+            double score = teamChoose.multiPlayerTeamScore(canonical);
+
+            String action;
+            if (i == 0) {
+                action = "Initial team";
+            } else {
+                action = describeMove(previousTeam, teamIds);
+            }
+
+            steps.add(new StepDto(i, new ArrayList<>(canonical), new ArrayList<>(opposing), score, action));
+            previousTeam = teamIds;
+        }
+
+        return new StepsResultDto(request.getAlgorithm(), steps, elapsed);
+    }
+
+    /**
+     * Describes what changed between two consecutive team states.
+     */
+    private String describeMove(List<Integer> before, List<Integer> after) {
+        for (Integer p : after) {
+            if (!before.contains(p)) {
+                return "Added player " + p;
+            }
+        }
+        for (Integer p : before) {
+            if (!after.contains(p)) {
+                return "Removed player " + p;
+            }
+        }
+        return "No change";
+    }
+
+    /**
      * Converts a list of player IDs into a Team object.
      */
     private Team toTeam(List<Integer> playerIds) {

@@ -3,8 +3,10 @@ package com.matchmaking.algorithms;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -389,6 +391,72 @@ public class TeamChoose {
         } while (improved);
 
         return currentTeam;
+    }
+
+    /**
+     * Runs localSearchFirst and records a snapshot after each individual move.
+     * Each snapshot is a list of player IDs representing the current team state.
+     * The first snapshot is the initial team before any moves.
+     */
+    public List<List<Integer>> localSearchFirstWithSteps(Team initTeam) {
+        List<List<Integer>> steps = new ArrayList<>();
+        Team currentTeam = new Team();
+        currentTeam.addAll(initTeam);
+        steps.add(new ArrayList<>(currentTeam));
+
+        boolean improved;
+        do {
+            improved = false;
+
+            Integer playerToAdd = firstSingleAddedImprovement(currentTeam);
+            if (playerToAdd != null) {
+                currentTeam.add(playerToAdd);
+                steps.add(new ArrayList<>(currentTeam));
+                improved = true;
+            }
+
+            Integer playerToRemove = firstSingleRemovedImprovement(currentTeam);
+            if (playerToRemove != null) {
+                currentTeam.remove(playerToRemove);
+                steps.add(new ArrayList<>(currentTeam));
+                improved = true;
+            }
+        } while (improved);
+
+        return steps;
+    }
+
+    /**
+     * Runs localSearchBest and records a snapshot after each individual move.
+     * Each snapshot is a list of player IDs representing the current team state.
+     * The first snapshot is the initial team before any moves.
+     */
+    public List<List<Integer>> localSearchBestWithSteps(Team initTeam) {
+        List<List<Integer>> steps = new ArrayList<>();
+        Team currentTeam = new Team();
+        currentTeam.addAll(initTeam);
+        steps.add(new ArrayList<>(currentTeam));
+
+        boolean improved;
+        do {
+            improved = false;
+
+            Integer playerToAdd = bestSingleAddedImprovement(currentTeam);
+            if (playerToAdd != null) {
+                currentTeam.add(playerToAdd);
+                steps.add(new ArrayList<>(currentTeam));
+                improved = true;
+            }
+
+            Integer playerToRemove = bestSingleRemovedImprovement(currentTeam);
+            if (playerToRemove != null) {
+                currentTeam.remove(playerToRemove);
+                steps.add(new ArrayList<>(currentTeam));
+                improved = true;
+            }
+        } while (improved);
+
+        return steps;
     }
 
     /**

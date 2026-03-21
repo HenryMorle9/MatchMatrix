@@ -21,3 +21,17 @@ export interface MatchmakingResult {
   score: number;
   runtimeMs: number;
 }
+
+export interface Step {
+  stepNumber: number;
+  team: number[];
+  opposingTeam: number[];
+  score: number;
+  action: string;
+}
+
+export interface StepsResult {
+  algorithm: string;
+  steps: Step[];
+  runtimeMs: number;
+}

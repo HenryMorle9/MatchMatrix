@@ -1,4 +1,4 @@
-import type { GraphRequest, MatchmakingRequest, MatchmakingResult } from "../types/matchmaking";
+import type { GraphRequest, MatchmakingRequest, MatchmakingResult, StepsResult } from "../types/matchmaking";
 
 const BASE_URL = "/api";
 
@@ -18,6 +18,17 @@ export async function runAlgorithm(request: MatchmakingRequest, signal?: AbortSi
     body: JSON.stringify(request),
     signal,
   });
+  return res.json();
+}
+
+export async function runWithSteps(request: MatchmakingRequest, signal?: AbortSignal): Promise<StepsResult> {
+  const res = await fetch(`${BASE_URL}/matchmaking/steps`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+    signal,
+  });
+  if (!res.ok) throw new Error(`Steps request failed: ${res.status}`);
   return res.json();
 }
 
