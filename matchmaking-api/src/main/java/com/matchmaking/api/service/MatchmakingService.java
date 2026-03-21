@@ -127,9 +127,15 @@ public class MatchmakingService {
             case "localSearchBest":
                 rawSteps = teamChoose.localSearchBestWithSteps(initTeam);
                 break;
+            case "guaranteedBestTeam": {
+                Team result = teamChoose.guaranteedBestTeam();
+                rawSteps = new ArrayList<>();
+                rawSteps.add(new ArrayList<>());
+                rawSteps.add(new ArrayList<>(result));
+                break;
+            }
             default:
-                throw new IllegalArgumentException(
-                        "Step-by-step mode only supports localSearchFirst and localSearchBest");
+                throw new IllegalArgumentException("Unknown algorithm: " + request.getAlgorithm());
         }
 
         long elapsed = System.currentTimeMillis() - start;
@@ -162,16 +168,17 @@ public class MatchmakingService {
      * Describes what changed between two consecutive team states.
      */
     private String describeMove(List<Integer> before, List<Integer> after) {
+        List<Integer> added = new ArrayList<>();
+        List<Integer> removed = new ArrayList<>();
         for (Integer p : after) {
-            if (!before.contains(p)) {
-                return "Added player " + p;
-            }
+            if (!before.contains(p)) added.add(p);
         }
         for (Integer p : before) {
-            if (!after.contains(p)) {
-                return "Removed player " + p;
-            }
+            if (!after.contains(p)) removed.add(p);
         }
+        if (added.size() == 1 && removed.isEmpty()) return "Added player " + added.get(0);
+        if (removed.size() == 1 && added.isEmpty()) return "Removed player " + removed.get(0);
+        if (!added.isEmpty()) return "Optimal team found";
         return "No change";
     }
 

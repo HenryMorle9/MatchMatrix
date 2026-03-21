@@ -86,4 +86,72 @@ class MatchmakingServiceTest {
         assertEquals("localSearchBest", result.getResults().get(1).getAlgorithm());
         assertEquals("guaranteedBestTeam", result.getResults().get(2).getAlgorithm());
     }
+
+    // === Step-by-step tests ===
+
+    @Test
+    @DisplayName("Steps for Local Search First returns correct first and last step")
+    void stepsLocalSearchFirst_returnsCorrectSteps() {
+        RunRequestDto req = new RunRequestDto();
+        req.setAlgorithm("localSearchFirst");
+        req.setInitialTeam(List.of(1, 3, 5));
+
+        StepsResultDto result = service.runWithSteps(req);
+
+        assertEquals("localSearchFirst", result.getAlgorithm());
+        assertTrue(result.getSteps().size() > 1);
+        assertEquals("Initial team", result.getSteps().get(0).getAction());
+        // Final step should reach score 18
+        StepDto lastStep = result.getSteps().get(result.getSteps().size() - 1);
+        assertEquals(18.0, lastStep.getScore());
+    }
+
+    @Test
+    @DisplayName("Steps for Local Search Best reaches optimal score 20")
+    void stepsLocalSearchBest_reachesOptimal() {
+        RunRequestDto req = new RunRequestDto();
+        req.setAlgorithm("localSearchBest");
+        req.setInitialTeam(List.of(0, 5));
+
+        StepsResultDto result = service.runWithSteps(req);
+
+        assertEquals("localSearchBest", result.getAlgorithm());
+        assertTrue(result.getSteps().size() > 1);
+        StepDto lastStep = result.getSteps().get(result.getSteps().size() - 1);
+        assertEquals(20.0, lastStep.getScore());
+        assertEquals(List.of(0, 2, 5, 6), lastStep.getTeam());
+    }
+
+    @Test
+    @DisplayName("Steps for Guaranteed Best returns 2 steps with optimal result")
+    void stepsGuaranteedBest_returnsTwoSteps() {
+        RunRequestDto req = new RunRequestDto();
+        req.setAlgorithm("guaranteedBestTeam");
+        req.setInitialTeam(List.of());
+
+        StepsResultDto result = service.runWithSteps(req);
+
+        assertEquals("guaranteedBestTeam", result.getAlgorithm());
+        assertEquals(2, result.getSteps().size());
+        assertEquals("Initial team", result.getSteps().get(0).getAction());
+        assertEquals("Optimal team found", result.getSteps().get(1).getAction());
+        assertEquals(20.0, result.getSteps().get(1).getScore());
+    }
+
+    @Test
+    @DisplayName("Steps scores never decrease")
+    void stepsScores_neverDecrease() {
+        RunRequestDto req = new RunRequestDto();
+        req.setAlgorithm("localSearchBest");
+        req.setInitialTeam(List.of(0, 5));
+
+        StepsResultDto result = service.runWithSteps(req);
+
+        for (int i = 1; i < result.getSteps().size(); i++) {
+            assertTrue(
+                result.getSteps().get(i).getScore() >= result.getSteps().get(i - 1).getScore(),
+                "Score should never decrease between steps"
+            );
+        }
+    }
 }

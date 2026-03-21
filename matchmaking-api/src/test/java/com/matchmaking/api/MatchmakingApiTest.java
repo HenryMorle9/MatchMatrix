@@ -129,6 +129,37 @@ class MatchmakingApiTest {
 
     @Test
     @Order(8)
+    @DisplayName("Steps for Local Search First returns steps with correct structure")
+    void steps_localSearchFirst_returnsSteps() throws Exception {
+        mockMvc.perform(post("/api/matchmaking/steps")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"algorithm": "localSearchFirst", "initialTeam": [1, 3, 5]}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.algorithm").value("localSearchFirst"))
+                .andExpect(jsonPath("$.steps").isArray())
+                .andExpect(jsonPath("$.steps[0].action").value("Initial team"))
+                .andExpect(jsonPath("$.steps[0].stepNumber").value(0));
+    }
+
+    @Test
+    @Order(9)
+    @DisplayName("Steps for Guaranteed Best returns 2 steps")
+    void steps_guaranteedBest_returnsTwoSteps() throws Exception {
+        mockMvc.perform(post("/api/matchmaking/steps")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"algorithm": "guaranteedBestTeam", "initialTeam": []}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.algorithm").value("guaranteedBestTeam"))
+                .andExpect(jsonPath("$.steps.length()").value(2))
+                .andExpect(jsonPath("$.steps[1].score").value(20.0));
+    }
+
+    @Test
+    @Order(10)
     @DisplayName("Compare returns all 3 algorithms")
     void compare_returnsAllThreeAlgorithms() throws Exception {
         mockMvc.perform(post("/api/matchmaking/compare")

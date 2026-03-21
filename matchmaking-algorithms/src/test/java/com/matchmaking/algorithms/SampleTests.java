@@ -3,6 +3,7 @@ package com.matchmaking.algorithms;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -292,5 +293,65 @@ public class SampleTests {
         Team tester = new Team();
         tester.add(0);
         assertTrue(allTeams.optimalLocalSearchBest(tester));
+    }
+
+    // === Step-by-step tracking ===
+
+    @Test
+    @DisplayName("Local Search First with steps starts and ends correctly")
+    void testLocalSearchFirstWithSteps() {
+        Team startT = new Team();
+        startT.add(1);
+        startT.add(3);
+        startT.add(5);
+        List<List<Integer>> steps = allTeams.localSearchFirstWithSteps(startT);
+
+        // First step is the initial team
+        assertEquals(List.of(1, 3, 5), steps.get(0));
+        // Last step matches the final result of localSearchFirst
+        assertEquals(List.of(0, 1, 5), steps.get(steps.size() - 1));
+        // Should have more than 1 step (algorithm made moves)
+        assertTrue(steps.size() > 1);
+    }
+
+    @Test
+    @DisplayName("Local Search Best with steps starts and ends correctly")
+    void testLocalSearchBestWithSteps() {
+        Team startT = new Team();
+        startT.add(0);
+        startT.add(5);
+        List<List<Integer>> steps = allTeams.localSearchBestWithSteps(startT);
+
+        // First step is the initial team
+        assertEquals(List.of(0, 5), steps.get(0));
+        // Last step matches the final result of localSearchBest
+        assertEquals(List.of(0, 2, 5, 6), steps.get(steps.size() - 1));
+        assertTrue(steps.size() > 1);
+    }
+
+    @Test
+    @DisplayName("Each step differs by exactly one player")
+    void testStepsChangeBySinglePlayer() {
+        Team startT = new Team();
+        startT.add(0);
+        startT.add(5);
+        List<List<Integer>> steps = allTeams.localSearchBestWithSteps(startT);
+
+        for (int i = 1; i < steps.size(); i++) {
+            List<Integer> prev = steps.get(i - 1);
+            List<Integer> curr = steps.get(i);
+            // Count differences: exactly one player added or removed
+            int added = 0, removed = 0;
+            for (Integer p : curr) {
+                if (!prev.contains(p)) added++;
+            }
+            for (Integer p : prev) {
+                if (!curr.contains(p)) removed++;
+            }
+            assertTrue(
+                (added == 1 && removed == 0) || (added == 0 && removed == 1),
+                "Step " + i + " should change by exactly one player"
+            );
+        }
     }
 }

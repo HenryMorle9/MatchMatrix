@@ -5,6 +5,7 @@ import type { Step, StepsResult, Edge } from "../types/matchmaking";
 const ALGORITHM_OPTIONS = [
   { value: "localSearchFirst", label: "Local Search (First)" },
   { value: "localSearchBest", label: "Local Search (Best)" },
+  { value: "guaranteedBestTeam", label: "Guaranteed Best (Exhaustive)" },
 ];
 
 /** Lay nodes evenly around a circle. */
@@ -127,7 +128,7 @@ export default function Visualise() {
           <label className="block text-sm font-medium text-gray-700">Algorithm</label>
           <select
             value={algorithm}
-            onChange={(e) => setAlgorithm(e.target.value)}
+            onChange={(e) => { setAlgorithm(e.target.value); setResult(null); setCurrentStep(0); setPlaying(false); }}
             className="mt-1 rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
           >
             {ALGORITHM_OPTIONS.map((opt) => (
@@ -164,27 +165,48 @@ export default function Visualise() {
           {/* SVG Graph */}
           <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-4">
             <svg width={700} height={600} className="block">
-              {/* Edges */}
+              {/* Edges — faint by default, highlighted if crossing teams */}
               {edges.map((edge, i) => {
                 const p1 = positions[edge.p1];
                 const p2 = positions[edge.p2];
                 if (!p1 || !p2) return null;
-                const mx = (p1.x + p2.x) / 2;
-                const my = (p1.y + p2.y) / 2;
+                const p1InT1 = step.team.includes(edge.p1);
+                const p2InT1 = step.team.includes(edge.p2);
+                const isCrossTeam = p1InT1 !== p2InT1;
+                // Find which player just moved (compare action text)
+                const movedPlayer = step.action.match(/player (\d+)/);
+                const movedId = movedPlayer ? Number(movedPlayer[1]) : -1;
+                const involvesMovedPlayer = edge.p1 === movedId || edge.p2 === movedId;
+                // Position the weight label on the outside of the ring, near the other node
+                const otherNode = edge.p1 === movedId ? p2 : p1;
+                // Direction from center of ring outward through the other node
+                const cx = 350, cy = 300;
+                const dx = otherNode.x - cx;
+                const dy = otherNode.y - cy;
+                const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                const labelX = otherNode.x + (dx / dist) * 32;
+                const labelY = otherNode.y + (dy / dist) * 32;
                 return (
                   <g key={i}>
                     <line
                       x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y}
-                      stroke="#d1d5db" strokeWidth={2}
+                      stroke={involvesMovedPlayer ? "#8b5cf6" : isCrossTeam ? "#93c5fd" : "#e5e7eb"}
+                      strokeWidth={involvesMovedPlayer ? 2.5 : isCrossTeam ? 1.5 : 0.5}
+                      opacity={involvesMovedPlayer ? 0.9 : isCrossTeam ? 0.5 : 0.15}
+                      className="transition-all duration-500"
                     />
-                    <text
-                      x={mx} y={my - 6}
-                      textAnchor="middle"
-                      className="text-xs fill-gray-400 select-none"
-                      fontSize={11}
-                    >
-                      {edge.score}
-                    </text>
+                    {involvesMovedPlayer && (
+                      <text
+                        x={labelX} y={labelY}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fontSize={11}
+                        fontWeight="bold"
+                        className="fill-violet-600 select-none"
+                      >
+                        {edge.score}
+                      </text>
+                    )}
                   </g>
                 );
               })}
@@ -194,9 +216,19 @@ export default function Visualise() {
                 if (!pos) return null;
                 const inTeam1 = step.team.includes(id);
                 const inTeam2 = step.opposingTeam.includes(id);
+                const movedPlayer = step.action.match(/player (\d+)/);
+                const movedId = movedPlayer ? Number(movedPlayer[1]) : -1;
+                const isMovedNode = id === movedId;
                 const fill = inTeam1 ? "#3b82f6" : inTeam2 ? "#ef4444" : "#9ca3af";
                 return (
                   <g key={id}>
+                    {isMovedNode && (
+                      <circle
+                        cx={pos.x} cy={pos.y} r={28}
+                        fill="none" stroke="#8b5cf6" strokeWidth={3}
+                        className="transition-all duration-500"
+                      />
+                    )}
                     <circle
                       cx={pos.x} cy={pos.y} r={22}
                       fill={fill}
@@ -218,14 +250,32 @@ export default function Visualise() {
             </svg>
 
             {/* Legend */}
-            <div className="flex gap-4 mt-2 justify-center text-sm text-gray-600">
+            <div className="flex gap-4 mt-2 justify-center text-sm text-gray-600 flex-wrap">
               <span className="flex items-center gap-1">
                 <span className="inline-block w-3 h-3 rounded-full bg-blue-500" /> Team 1
               </span>
               <span className="flex items-center gap-1">
                 <span className="inline-block w-3 h-3 rounded-full bg-red-500" /> Team 2
               </span>
+              <span className="flex items-center gap-1">
+                <span className="inline-block w-3 h-3 rounded-full bg-violet-500" /> Current move
+              </span>
             </div>
+
+            {/* Algorithm explanation for guaranteed */}
+            {result?.algorithm === "guaranteedBestTeam" && (
+              <div className="mt-3 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+                <p className="font-semibold">Why only 2 steps?</p>
+                <p className="mt-1">
+                  The Guaranteed Best algorithm doesn't make moves like local search.
+                  Instead, it tries <strong>every possible team combination</strong> (all
+                  2<sup>n</sup> of them) and returns the one with the highest score.
+                  There's no step-by-step decision process to visualise — just the
+                  final optimal result. With {allPlayers.length} players, it checked{" "}
+                  {(2 ** allPlayers.length).toLocaleString()} combinations to find this answer.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Step info panel */}
