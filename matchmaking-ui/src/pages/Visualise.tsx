@@ -167,8 +167,9 @@ export default function Visualise() {
                 const dx = otherNode.x - cx;
                 const dy = otherNode.y - cy;
                 const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-                const labelX = otherNode.x + (dx / dist) * 32;
-                const labelY = otherNode.y + (dy / dist) * 32;
+                const labelOffset = 48;
+                const labelX = otherNode.x + (dx / dist) * labelOffset;
+                const labelY = otherNode.y + (dy / dist) * labelOffset;
                 return (
                   <g key={i}>
                     <line
