@@ -185,7 +185,7 @@ The result is a portfolio piece that is both technical and explorable.
 
 ## Current Status
 
-Implemented today:
+Implemented already:
 
 - Graph Builder
 - Dashboard
@@ -196,6 +196,6 @@ Implemented today:
 
 Next likely area of expansion:
 
-- deeper performance benchmarking
-- richer graph input workflows
+- Smarter Algorithms
+- Real-Time Progress for Exhaustive Search
 - more polished landing-page storytelling
