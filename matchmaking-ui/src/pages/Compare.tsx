@@ -2,12 +2,9 @@ import { useState } from "react";
 import { compareAlgorithms } from "../api/matchmaking";
 import type { MatchmakingResult } from "../types/matchmaking";
 import GraphStatus from "../components/GraphStatus";
-
-const ALGORITHM_LABELS: Record<string, string> = {
-  localSearchFirst: "Local Search (First)",
-  localSearchBest: "Local Search (Best)",
-  guaranteedBestTeam: "Guaranteed Best (Exhaustive)",
-};
+import HelpAccordion from "../components/HelpAccordion";
+import { ALGORITHM_LABELS } from "../constants/algorithms";
+import { parseTeamInput } from "../utils/parseTeamInput";
 
 export default function Compare() {
   const [initialTeam, setInitialTeam] = useState("");
@@ -20,11 +17,7 @@ export default function Compare() {
     setError("");
     setResults([]);
 
-    const team = initialTeam
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s !== "")
-      .map(Number);
+    const team = parseTeamInput(initialTeam);
 
     try {
       const res = await compareAlgorithms({
@@ -59,11 +52,7 @@ export default function Compare() {
       <GraphStatus />
 
       {/* How does this work? */}
-      <details className="theme-panel-subtle rounded-xl px-5 py-4">
-        <summary className="theme-label cursor-pointer select-none text-sm font-semibold">
-          How does this work?
-        </summary>
-        <div className="mt-4 space-y-3 text-sm leading-relaxed">
+      <HelpAccordion>
           <div>
             <p className="font-semibold text-white">What is this?</p>
             <p className="theme-note mt-1">
@@ -82,8 +71,7 @@ export default function Compare() {
               This is the best page to demonstrate the trade-off between speed and accuracy.
             </p>
           </div>
-        </div>
-      </details>
+      </HelpAccordion>
 
       {/* Controls */}
       <div className="mt-6 flex gap-4 items-end">

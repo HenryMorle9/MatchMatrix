@@ -2,12 +2,9 @@ import { useRef, useState } from "react";
 import { runAlgorithm } from "../api/matchmaking";
 import type { MatchmakingResult } from "../types/matchmaking";
 import GraphStatus from "../components/GraphStatus";
-
-const ALGORITHMS = [
-  { value: "localSearchFirst", label: "Local Search (First Improvement)" },
-  { value: "localSearchBest", label: "Local Search (Best Improvement)" },
-  { value: "guaranteedBestTeam", label: "Guaranteed Best Team (Exhaustive)" },
-];
+import HelpAccordion from "../components/HelpAccordion";
+import { ALGORITHMS } from "../constants/algorithms";
+import { parseTeamInput } from "../utils/parseTeamInput";
 
 export default function Dashboard() {
   const [algorithm, setAlgorithm] = useState(ALGORITHMS[0].value);
@@ -28,11 +25,7 @@ export default function Dashboard() {
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    const team = initialTeam
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s !== "")
-      .map(Number);
+    const team = parseTeamInput(initialTeam);
 
     try {
       const res = await runAlgorithm({ algorithm, initialTeam: team }, controller.signal);
@@ -64,11 +57,8 @@ export default function Dashboard() {
       <GraphStatus />
 
       {/* How does this work? */}
-      <details className="theme-panel-subtle rounded-xl px-5 py-4">
-        <summary className="theme-label cursor-pointer select-none text-sm font-semibold">
-          How does this work?
-        </summary>
-        <div className="mt-4 space-y-4 text-sm leading-relaxed">
+      <HelpAccordion>
+        <div className="space-y-4">
           <div>
             <p className="font-semibold text-white">What is this?</p>
             <p className="theme-note mt-1">
@@ -99,7 +89,7 @@ export default function Dashboard() {
             </p>
           </div>
         </div>
-      </details>
+      </HelpAccordion>
 
       {/* Controls */}
       <div className="mt-6 flex gap-4 items-end">

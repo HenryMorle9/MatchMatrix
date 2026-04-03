@@ -54,65 +54,28 @@ public class MatchmakingService {
         Team initTeam = toTeam(request.getInitialTeam());
 
         long start = System.currentTimeMillis();
-        Team resultTeam;
-
-        switch (request.getAlgorithm()) {
-            case "localSearchFirst":
-                resultTeam = teamChoose.localSearchFirst(initTeam);
-                break;
-            case "localSearchBest":
-                resultTeam = teamChoose.localSearchBest(initTeam);
-                break;
-            case "guaranteedBestTeam":
-                resultTeam = teamChoose.guaranteedBestTeam();
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown algorithm: " + request.getAlgorithm());
-        }
-
+        Team resultTeam = dispatchAlgorithm(request.getAlgorithm(), initTeam);
         long elapsed = System.currentTimeMillis() - start;
 
-        Team canonical = teamChoose.testWithLowestID(resultTeam);
-        Team opposing = teamChoose.otherTeam(canonical);
-        Double score = teamChoose.multiPlayerTeamScore(canonical);
-
-        return new TeamResultDto(
-                request.getAlgorithm(),
-                new ArrayList<>(canonical),
-                new ArrayList<>(opposing),
-                score,
-                elapsed
-        );
+        return buildResult(request.getAlgorithm(), resultTeam, elapsed);
     }
 
     /**
      * Runs all three algorithms and returns their results for comparison.
-     * Local search methods use the provided initial team; exhaustive search ignores it.
      */
     public CompareResultDto compareAll(List<Integer> initialTeam) {
         List<TeamResultDto> results = new ArrayList<>();
-
-        RunRequestDto req1 = new RunRequestDto();
-        req1.setAlgorithm("localSearchFirst");
-        req1.setInitialTeam(initialTeam);
-        results.add(runAlgorithm(req1));
-
-        RunRequestDto req2 = new RunRequestDto();
-        req2.setAlgorithm("localSearchBest");
-        req2.setInitialTeam(initialTeam);
-        results.add(runAlgorithm(req2));
-
-        RunRequestDto req3 = new RunRequestDto();
-        req3.setAlgorithm("guaranteedBestTeam");
-        req3.setInitialTeam(initialTeam);
-        results.add(runAlgorithm(req3));
-
+        for (String algo : List.of("localSearchFirst", "localSearchBest", "guaranteedBestTeam")) {
+            RunRequestDto req = new RunRequestDto();
+            req.setAlgorithm(algo);
+            req.setInitialTeam(initialTeam);
+            results.add(runAlgorithm(req));
+        }
         return new CompareResultDto(results);
     }
 
     /**
      * Runs a local search algorithm and returns every intermediate team state.
-     * Only localSearchFirst and localSearchBest support step-by-step mode.
      */
     public StepsResultDto runWithSteps(RunRequestDto request) {
         Team initTeam = toTeam(request.getInitialTeam());
@@ -146,22 +109,30 @@ public class MatchmakingService {
         for (int i = 0; i < rawSteps.size(); i++) {
             List<Integer> teamIds = rawSteps.get(i);
             Team team = toTeam(teamIds);
-            Team canonical = teamChoose.testWithLowestID(team);
-            Team opposing = teamChoose.otherTeam(canonical);
-            double score = teamChoose.multiPlayerTeamScore(canonical);
+            TeamResultDto snapshot = buildResult(request.getAlgorithm(), team, 0);
 
-            String action;
-            if (i == 0) {
-                action = "Initial team";
-            } else {
-                action = describeMove(previousTeam, teamIds);
-            }
-
-            steps.add(new StepDto(i, new ArrayList<>(canonical), new ArrayList<>(opposing), score, action));
+            String action = (i == 0) ? "Initial team" : describeMove(previousTeam, teamIds);
+            steps.add(new StepDto(i, snapshot.getTeam(), snapshot.getOpposingTeam(), snapshot.getScore(), action));
             previousTeam = teamIds;
         }
 
         return new StepsResultDto(request.getAlgorithm(), steps, elapsed);
+    }
+
+    private Team dispatchAlgorithm(String algorithm, Team initTeam) {
+        switch (algorithm) {
+            case "localSearchFirst":  return teamChoose.localSearchFirst(initTeam);
+            case "localSearchBest":   return teamChoose.localSearchBest(initTeam);
+            case "guaranteedBestTeam": return teamChoose.guaranteedBestTeam();
+            default: throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
+        }
+    }
+
+    private TeamResultDto buildResult(String algorithm, Team team, long elapsedMs) {
+        Team canonical = teamChoose.testWithLowestID(team);
+        Team opposing = teamChoose.otherTeam(canonical);
+        double score = teamChoose.multiPlayerTeamScore(canonical);
+        return new TeamResultDto(algorithm, new ArrayList<>(canonical), new ArrayList<>(opposing), score, elapsedMs);
     }
 
     /**

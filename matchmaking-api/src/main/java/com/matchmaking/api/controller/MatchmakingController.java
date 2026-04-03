@@ -27,28 +27,23 @@ public class MatchmakingController {
 
     @PostMapping("/run")
     public ResponseEntity<TeamResultDto> run(@Valid @RequestBody RunRequestDto request) {
-        if (!matchmakingService.isGraphLoaded()) {
-            return ResponseEntity.badRequest().build();
-        }
-        TeamResultDto result = matchmakingService.runAlgorithm(request);
-        return ResponseEntity.ok(result);
+        if (graphNotLoaded()) return ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(matchmakingService.runAlgorithm(request));
     }
 
     @PostMapping("/steps")
     public ResponseEntity<StepsResultDto> steps(@Valid @RequestBody RunRequestDto request) {
-        if (!matchmakingService.isGraphLoaded()) {
-            return ResponseEntity.badRequest().build();
-        }
-        StepsResultDto result = matchmakingService.runWithSteps(request);
-        return ResponseEntity.ok(result);
+        if (graphNotLoaded()) return ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(matchmakingService.runWithSteps(request));
     }
 
     @PostMapping("/compare")
     public ResponseEntity<CompareResultDto> compare(@Valid @RequestBody RunRequestDto request) {
-        if (!matchmakingService.isGraphLoaded()) {
-            return ResponseEntity.badRequest().build();
-        }
-        CompareResultDto result = matchmakingService.compareAll(request.getInitialTeam());
-        return ResponseEntity.ok(result);
+        if (graphNotLoaded()) return ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(matchmakingService.compareAll(request.getInitialTeam()));
+    }
+
+    private boolean graphNotLoaded() {
+        return !matchmakingService.isGraphLoaded();
     }
 }

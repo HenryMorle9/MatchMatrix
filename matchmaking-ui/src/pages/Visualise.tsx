@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { runWithSteps } from "../api/matchmaking";
-import type { Step, StepsResult, Edge } from "../types/matchmaking";
+import type { Step, StepsResult } from "../types/matchmaking";
 import GraphStatus from "../components/GraphStatus";
-
-const ALGORITHM_OPTIONS = [
-  { value: "localSearchFirst", label: "Local Search (First)" },
-  { value: "localSearchBest", label: "Local Search (Best)" },
-  { value: "guaranteedBestTeam", label: "Guaranteed Best (Exhaustive)" },
-];
+import HelpAccordion from "../components/HelpAccordion";
+import { ALGORITHMS } from "../constants/algorithms";
+import { parseTeamInput } from "../utils/parseTeamInput";
+import { useGraph } from "../context/GraphContext";
 
 /** Lay nodes evenly around a circle. */
 function circularLayout(nodeIds: number[], cx: number, cy: number, radius: number) {
@@ -23,6 +21,7 @@ function circularLayout(nodeIds: number[], cx: number, cy: number, radius: numbe
 }
 
 export default function Visualise() {
+  const { apiEdges: edges, allPlayers, refreshGraph } = useGraph();
   const [algorithm, setAlgorithm] = useState("localSearchFirst");
   const [initialTeam, setInitialTeam] = useState("");
   const [result, setResult] = useState<StepsResult | null>(null);
@@ -30,30 +29,7 @@ export default function Visualise() {
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [edges, setEdges] = useState<Edge[]>([]);
-  const [allPlayers, setAllPlayers] = useState<number[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Fetch graph edges on mount so we can draw the graph
-  useEffect(() => {
-    fetch("/api/graph")
-      .then((res) => {
-        if (!res.ok) return null;
-        return res.json();
-      })
-      .then((data) => {
-        if (data?.edges) {
-          setEdges(data.edges);
-          const players = new Set<number>();
-          data.edges.forEach((e: Edge) => {
-            players.add(e.p1);
-            players.add(e.p2);
-          });
-          setAllPlayers([...players].sort((a, b) => a - b));
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   // Auto-play timer
   useEffect(() => {
@@ -80,28 +56,10 @@ export default function Visualise() {
     setCurrentStep(0);
     setPlaying(false);
 
-    const team = initialTeam
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s !== "")
-      .map(Number);
+    const team = parseTeamInput(initialTeam);
 
     try {
-      // Refresh graph edges
-      const graphRes = await fetch("/api/graph");
-      if (graphRes.ok) {
-        const graphData = await graphRes.json();
-        if (graphData?.edges) {
-          setEdges(graphData.edges);
-          const players = new Set<number>();
-          graphData.edges.forEach((e: Edge) => {
-            players.add(e.p1);
-            players.add(e.p2);
-          });
-          setAllPlayers([...players].sort((a, b) => a - b));
-        }
-      }
-
+      await refreshGraph();
       const res = await runWithSteps({ algorithm, initialTeam: team });
       setResult(res);
     } catch {
@@ -126,11 +84,7 @@ export default function Visualise() {
       <GraphStatus />
 
       {/* How does this work? */}
-      <details className="theme-panel-subtle rounded-xl px-5 py-4">
-        <summary className="theme-label cursor-pointer select-none text-sm font-semibold">
-          How does this work?
-        </summary>
-        <div className="mt-4 space-y-3 text-sm leading-relaxed">
+      <HelpAccordion>
           <div>
             <p className="font-semibold text-white">What is this?</p>
             <p className="theme-note mt-1">
@@ -149,8 +103,7 @@ export default function Visualise() {
               Click any row in the step history table to jump to that step. The Exhaustive algorithm only shows 2 steps (start → end) because it doesn't make incremental moves.
             </p>
           </div>
-        </div>
-      </details>
+      </HelpAccordion>
 
       {/* Controls */}
       <div className="mt-6 flex gap-4 items-end flex-wrap">
@@ -161,7 +114,7 @@ export default function Visualise() {
             onChange={(e) => { setAlgorithm(e.target.value); setResult(null); setCurrentStep(0); setPlaying(false); }}
             className="theme-input mt-2 rounded-lg px-3 py-2 text-sm"
           >
-            {ALGORITHM_OPTIONS.map((opt) => (
+            {ALGORITHMS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
