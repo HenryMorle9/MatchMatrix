@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { loadGraph } from "../api/matchmaking";
 import type { Edge } from "../types/matchmaking";
 import { useGraph } from "../context/GraphContext";
@@ -6,7 +7,8 @@ import HelpAccordion from "../components/HelpAccordion";
 import { getPlayerName } from "../utils/playerNames";
 
 export default function GraphBuilder() {
-  const { edges, setEdges, status, setStatus } = useGraph();
+  const { edges, setEdges, status, setStatus, refreshGraph } = useGraph();
+  const navigate = useNavigate();
 
   // Player count for random generation
   const [playerCount, setPlayerCount] = useState("7");
@@ -51,6 +53,8 @@ export default function GraphBuilder() {
     try {
       const message = await loadGraph({ edges });
       setStatus(message);
+      await refreshGraph();
+      navigate("/dashboard");
     } catch {
       setStatus("Failed to load graph. Is the API running?");
     }
