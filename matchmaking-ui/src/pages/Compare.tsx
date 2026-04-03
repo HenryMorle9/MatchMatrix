@@ -71,7 +71,7 @@ export default function Compare() {
           <div>
             <p className="font-semibold text-white">Why do scores differ?</p>
             <p className="theme-note mt-1">
-              Local Search algorithms take shortcuts — they're fast but can get stuck on a "good enough" answer. The Exhaustive algorithm checks everything and always finds the best answer, but takes much longer.
+              Local Search algorithms take shortcuts. This means they're fast but can get stuck on a "good enough" answer. The Exhaustive algorithm checks everything and always finds the best answer, but takes much, much longer.
             </p>
           </div>
           <div>

@@ -264,7 +264,7 @@ export default function Visualise() {
                   The Guaranteed Best algorithm doesn't make moves like local search.
                   Instead, it tries <strong>every possible team combination</strong> (all
                   2<sup>n</sup> of them) and returns the one with the highest score.
-                  There's no step-by-step decision process to visualise — just the
+                  There's no step-by-step decision process to visualise, only the
                   final optimal result. With {allPlayers.length} players, it checked{" "}
                   {(2 ** allPlayers.length).toLocaleString()} combinations to find this answer.
                 </p>
