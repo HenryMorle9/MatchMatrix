@@ -52,38 +52,45 @@ export default function Compare() {
 
   return (
     <div className="theme-page">
-      <h1 className="theme-title">Algorithm Comparison</h1>
-      <p className="theme-subtitle mt-3">
-        Run all three algorithms on the same graph and compare results side by
-        side.
-      </p>
+      <div className="animate-fade-in-up">
+        <p className="theme-section-title">Benchmark</p>
+        <h1 className="theme-title mt-2">Algorithm Comparison</h1>
+        <p className="theme-subtitle mt-3">
+          Run all three algorithms on the same graph and compare results side by
+          side.
+        </p>
+      </div>
 
-      <GraphStatus />
+      <div className="mt-4 animate-fade-in-up delay-1">
+        <GraphStatus />
+      </div>
 
       {/* How does this work? */}
-      <HelpAccordion>
-          <div>
-            <p className="font-semibold text-white">What is this?</p>
-            <p className="theme-note mt-1">
-              This page runs all three algorithms on the same graph and shows you how they compare. You'll see which one found the best team split (Most Accurate) and which one was quickest (Fastest).
-            </p>
-          </div>
-          <div>
-            <p className="font-semibold text-white">Why do scores differ?</p>
-            <p className="theme-note mt-1">
-              Local Search algorithms take shortcuts. This means they're fast but can get stuck on a "good enough" answer. The Exhaustive algorithm checks everything and always finds the best answer, but takes much, much longer.
-            </p>
-          </div>
-          <div>
-            <p className="font-semibold text-white">Tip</p>
-            <p className="theme-note mt-1">
-              This is the best page to demonstrate the trade-off between speed and accuracy.
-            </p>
-          </div>
-      </HelpAccordion>
+      <div className="mt-4 animate-fade-in-up delay-2">
+        <HelpAccordion>
+            <div>
+              <p className="font-semibold text-[#ECE8E1]">What is this?</p>
+              <p className="theme-note mt-1">
+                This page runs all three algorithms on the same graph and shows you how they compare. You'll see which one found the best team split (Most Accurate) and which one was quickest (Fastest).
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-[#ECE8E1]">Why do scores differ?</p>
+              <p className="theme-note mt-1">
+                Local Search algorithms take shortcuts. This means they're fast but can get stuck on a "good enough" answer. The Exhaustive algorithm checks everything and always finds the best answer, but takes much, much longer.
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-[#ECE8E1]">Tip</p>
+              <p className="theme-note mt-1">
+                This is the best page to demonstrate the trade-off between speed and accuracy.
+              </p>
+            </div>
+        </HelpAccordion>
+      </div>
 
       {/* Controls */}
-      <div className="mt-6 flex gap-4 items-end">
+      <div className="mt-6 flex gap-4 items-end animate-fade-in-up delay-3">
         <div>
           <label className="theme-label block">
             Initial Team (optional)
@@ -106,11 +113,11 @@ export default function Compare() {
       </div>
 
       {loading && (
-        <div className="mt-4">
+        <div className="mt-4 animate-fade-in">
           <p className="theme-note mb-2 text-sm">
             Running all three algorithms — exhaustive search may take a while on large graphs...
           </p>
-          <div className="theme-loading-track h-2 w-full overflow-hidden rounded-full">
+          <div className="theme-loading-track h-1.5 w-full overflow-hidden rounded-full">
             <div className="theme-loading-fill h-full w-full animate-pulse rounded-full" />
           </div>
         </div>
@@ -120,7 +127,7 @@ export default function Compare() {
 
       {/* Results table */}
       {results.length > 0 && (
-        <div className="theme-panel mt-6 overflow-hidden rounded-xl">
+        <div className="theme-panel mt-6 overflow-hidden rounded-xl animate-scale-in">
           <table className="theme-table w-full text-left text-sm">
             <thead className="theme-card-header">
               <tr>
@@ -137,18 +144,18 @@ export default function Compare() {
                   key={r.algorithm}
                   className="theme-divider border-b"
                 >
-                  <td className="px-4 py-3 font-medium text-white">
+                  <td className="px-4 py-3 font-medium text-[#ECE8E1]">
                     {ALGORITHM_LABELS[r.algorithm] ?? r.algorithm}
                   </td>
                   <td className="px-4 py-3">
                     <p className="theme-label">({r.team.length} players)</p>
-                    <p className="mt-1">{formatPlayerList(r.team)}</p>
+                    <p className="mt-1 text-[#38bdf8]">{formatPlayerList(r.team)}</p>
                   </td>
                   <td className="px-4 py-3">
                     <p className="theme-label">({r.opposingTeam.length} players)</p>
-                    <p className="mt-1">{formatPlayerList(r.opposingTeam)}</p>
+                    <p className="mt-1 text-[#FF4655]">{formatPlayerList(r.opposingTeam)}</p>
                   </td>
-                  <td className="px-4 py-3 font-bold text-white">
+                  <td className="px-4 py-3 font-bold text-[#ECE8E1]">
                     {Math.round(r.score * 100) / 100}
                     {r.score === bestScore && (
                       <span className="theme-chip-success ml-2">
@@ -170,7 +177,6 @@ export default function Compare() {
           </table>
         </div>
       )}
-
     </div>
   );
 }

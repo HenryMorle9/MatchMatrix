@@ -63,8 +63,9 @@ export default function GraphBuilder() {
   return (
     <div className="theme-page space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="theme-title">Graph Builder</h1>
+      <div className="animate-fade-in-up">
+        <p className="theme-section-title">Build</p>
+        <h1 className="theme-title mt-2">Graph Builder</h1>
         <p className="theme-subtitle mt-3">
           Generate a random player graph with compatibility scores, then load it
           into the API.
@@ -72,29 +73,31 @@ export default function GraphBuilder() {
       </div>
 
       {/* How does this work? */}
-      <HelpAccordion>
-        <div>
-          <p className="font-semibold text-white">What is this?</p>
-          <p className="theme-note mt-1">
-            This page creates a network of players with compatibility scores. Think of it like a social network. Each connection between two players has a number showing how well they play together. The higher the number, the better the pairing.
-          </p>
-        </div>
-        <div>
-          <p className="font-semibold text-white">How to use</p>
-          <p className="theme-note mt-1">
-            Pick how many players you want, hit Generate Random, then click Load Graph to send it to the matchmaking engine. The other pages (Dashboard, Compare, Visualise) all use this loaded graph.
-          </p>
-        </div>
-        <div>
-          <p className="font-semibold text-white">Tip</p>
-          <p className="theme-note mt-1">
-            Start with 7 players to see results instantly. Above 20 players, the exhaustive algorithm will take noticeably longer.
-          </p>
-        </div>
-      </HelpAccordion>
+      <div className="animate-fade-in-up delay-1">
+        <HelpAccordion>
+          <div>
+            <p className="font-semibold text-[#ECE8E1]">What is this?</p>
+            <p className="theme-note mt-1">
+              This page creates a network of players with compatibility scores. Think of it like a social network. Each connection between two players has a number showing how well they play together. The higher the number, the better the pairing.
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold text-[#ECE8E1]">How to use</p>
+            <p className="theme-note mt-1">
+              Pick how many players you want, hit Generate Random, then click Load Graph to send it to the matchmaking engine. The other pages (Dashboard, Compare, Visualise) all use this loaded graph.
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold text-[#ECE8E1]">Tip</p>
+            <p className="theme-note mt-1">
+              Start with 7 players to see results instantly. Above 20 players, the exhaustive algorithm will take noticeably longer.
+            </p>
+          </div>
+        </HelpAccordion>
+      </div>
 
       {/* Generate random graph */}
-      <div className="theme-panel rounded-xl p-5">
+      <div className="theme-panel rounded-xl p-5 animate-fade-in-up delay-2">
         <h2 className="theme-section-title mb-3">Generate Graph</h2>
         <div className="flex gap-3 items-end">
           <div>
@@ -135,14 +138,14 @@ export default function GraphBuilder() {
         }
 
         function timeColor(seconds: number): string {
-          if (seconds < 1) return "text-green-600";
-          if (seconds < 10) return "text-yellow-600";
-          if (seconds < 300) return "text-orange-600";
-          return "text-red-600";
+          if (seconds < 1) return "text-green-500";
+          if (seconds < 10) return "text-yellow-500";
+          if (seconds < 300) return "text-orange-500";
+          return "text-[#FF4655]";
         }
 
         return (
-          <div className="theme-panel-subtle mt-4 rounded-xl p-4">
+          <div className="theme-panel-subtle mt-4 rounded-xl p-4 animate-fade-in">
             <h3 className="theme-section-title">
               Estimated Performance ({uniquePlayers} players)
             </h3>
@@ -158,12 +161,12 @@ export default function GraphBuilder() {
                 <tr className="theme-divider border-t">
                   <td className="py-1">Local Search (First)</td>
                   <td className="theme-note py-1">O(n²)</td>
-                  <td className="py-1 text-green-600 font-medium">{"< 1 second"}</td>
+                  <td className="py-1 text-green-500 font-medium">{"< 1 second"}</td>
                 </tr>
                 <tr className="theme-divider border-t">
                   <td className="py-1">Local Search (Best)</td>
                   <td className="theme-note py-1">O(n²)</td>
-                  <td className="py-1 text-green-600 font-medium">{"< 1 second"}</td>
+                  <td className="py-1 text-green-500 font-medium">{"< 1 second"}</td>
                 </tr>
                 <tr className="theme-divider border-t">
                   <td className="py-1">Guaranteed Best (Exhaustive)</td>
@@ -182,7 +185,7 @@ export default function GraphBuilder() {
 
       {/* Load graph action */}
       {edges.length > 0 && (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 animate-fade-in">
           <button
             onClick={handleLoadGraph}
             className="theme-btn-accent px-6 py-2.5 text-sm"
@@ -197,7 +200,7 @@ export default function GraphBuilder() {
 
       {/* Edge list table */}
       {edges.length > 0 && (
-        <div className="theme-panel overflow-hidden rounded-xl">
+        <div className="theme-panel overflow-hidden rounded-xl animate-fade-in-up">
           <div className="theme-card-header theme-divider border-b px-5 py-3">
             <h2 className="theme-section-title">
               Edges ({edges.length})

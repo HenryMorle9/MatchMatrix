@@ -54,51 +54,58 @@ export default function Dashboard() {
 
   return (
     <div className="theme-page">
-      <h1 className="theme-title">Matchmaking Dashboard</h1>
-      <p className="theme-subtitle mt-3">
-        Pick an algorithm, set an optional starting team, and run it against
-        your loaded graph.
-      </p>
+      <div className="animate-fade-in-up">
+        <p className="theme-section-title">Execute</p>
+        <h1 className="theme-title mt-2">Dashboard</h1>
+        <p className="theme-subtitle mt-3">
+          Pick an algorithm, set an optional starting team, and run it against
+          your loaded graph.
+        </p>
+      </div>
 
-      <GraphStatus />
+      <div className="mt-4 animate-fade-in-up delay-1">
+        <GraphStatus />
+      </div>
 
       {/* How does this work? */}
-      <HelpAccordion>
-        <div className="space-y-4">
-          <div>
-            <p className="font-semibold text-white">What is this?</p>
-            <p className="theme-note mt-1">
-              This page runs a single matchmaking algorithm to split your players into two balanced teams. The goal is to put players with high synergy on opposite teams, creating the most competitive match possible.
-            </p>
-          </div>
-          <div>
-            <p className="font-semibold text-white">The Algorithms</p>
-            <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="theme-panel rounded-lg p-3">
-                <p className="font-semibold text-sky-300">Local Search (First)</p>
-                <p className="theme-note mt-1">Tries swapping one player at a time. Takes the first swap that improves the score. Fast but may miss the best answer.</p>
-              </div>
-              <div className="theme-panel rounded-lg p-3">
-                <p className="font-semibold text-sky-300">Local Search (Best)</p>
-                <p className="theme-note mt-1">Also swaps one player at a time, but checks every possible swap and picks the best one each round. Slower but smarter.</p>
-              </div>
-              <div className="theme-panel rounded-lg p-3">
-                <p className="font-semibold text-sky-300">Guaranteed Best (Exhaustive)</p>
-                <p className="theme-note mt-1">Checks every possible team combination to find the absolute best split. Perfect results, but gets very slow with more than ~20 players.</p>
+      <div className="mt-4 animate-fade-in-up delay-2">
+        <HelpAccordion>
+          <div className="space-y-4">
+            <div>
+              <p className="font-semibold text-[#ECE8E1]">What is this?</p>
+              <p className="theme-note mt-1">
+                This page runs a single matchmaking algorithm to split your players into two balanced teams. The goal is to put players with high synergy on opposite teams, creating the most competitive match possible.
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-[#ECE8E1]">The Algorithms</p>
+              <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="theme-panel rounded-lg p-3">
+                  <p className="font-semibold text-[#38bdf8]">Local Search (First)</p>
+                  <p className="theme-note mt-1">Tries swapping one player at a time. Takes the first swap that improves the score. Fast but may miss the best answer.</p>
+                </div>
+                <div className="theme-panel rounded-lg p-3">
+                  <p className="font-semibold text-[#38bdf8]">Local Search (Best)</p>
+                  <p className="theme-note mt-1">Also swaps one player at a time, but checks every possible swap and picks the best one each round. Slower but smarter.</p>
+                </div>
+                <div className="theme-panel rounded-lg p-3">
+                  <p className="font-semibold text-[#FF4655]">Guaranteed Best (Exhaustive)</p>
+                  <p className="theme-note mt-1">Checks every possible team combination to find the absolute best split. Perfect results, but gets very slow with more than ~20 players.</p>
+                </div>
               </div>
             </div>
+            <div>
+              <p className="font-semibold text-[#ECE8E1]">Tip</p>
+              <p className="theme-note mt-1">
+                The "Initial Team" field lets you choose which players start on Team 1. Try different starting teams with Local Search to see how the starting point affects the result.
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="font-semibold text-white">Tip</p>
-            <p className="theme-note mt-1">
-              The "Initial Team" field lets you choose which players start on Team 1. Try different starting teams with Local Search to see how the starting point affects the result.
-            </p>
-          </div>
-        </div>
-      </HelpAccordion>
+        </HelpAccordion>
+      </div>
 
       {/* Controls */}
-      <div className="mt-6 flex gap-4 items-end">
+      <div className="mt-6 flex gap-4 items-end animate-fade-in-up delay-3">
         <div>
           <label className="theme-label block">
             Algorithm
@@ -148,11 +155,11 @@ export default function Dashboard() {
 
       {/* Loading bar */}
       {loading && (
-        <div className="mt-4">
+        <div className="mt-4 animate-fade-in">
           <p className="theme-note mb-2 text-sm">
             Running algorithm — exhaustive search may take a while on large graphs...
           </p>
-          <div className="theme-loading-track h-2 w-full overflow-hidden rounded-full">
+          <div className="theme-loading-track h-1.5 w-full overflow-hidden rounded-full">
             <div className="theme-loading-fill h-full w-full animate-pulse rounded-full" />
           </div>
         </div>
@@ -165,30 +172,30 @@ export default function Dashboard() {
 
       {/* Result card */}
       {result && (
-        <div className="theme-panel mt-6 rounded-xl p-6">
+        <div className="theme-panel mt-6 rounded-xl p-6 animate-scale-in">
           <h2 className="theme-section-title">
             {ALGORITHMS.find((a) => a.value === result.algorithm)?.label ?? result.algorithm}
           </h2>
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             <div>
               <p className="theme-label">Team 1 ({result.team.length})</p>
-              <p className="mt-2 text-lg font-bold text-white">
+              <p className="mt-2 text-lg font-bold text-[#38bdf8]">
                 {formatPlayerList(result.team)}
               </p>
             </div>
             <div>
               <p className="theme-label">Team 2 ({result.opposingTeam.length})</p>
-              <p className="mt-2 text-lg font-bold text-white">
+              <p className="mt-2 text-lg font-bold text-[#FF4655]">
                 {formatPlayerList(result.opposingTeam)}
               </p>
             </div>
             <div>
               <p className="theme-label">Score</p>
-              <p className="mt-2 text-xl font-bold text-white">{result.score}</p>
+              <p className="mt-2 text-xl font-bold text-[#ECE8E1]">{result.score}</p>
             </div>
             <div>
               <p className="theme-label">Runtime</p>
-              <p className="theme-mono mt-2 text-xl font-bold text-white">
+              <p className="theme-mono mt-2 text-xl font-bold text-[#ECE8E1]">
                 {result.runtimeMs} ms
               </p>
             </div>

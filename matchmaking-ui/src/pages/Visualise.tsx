@@ -90,37 +90,44 @@ export default function Visualise() {
 
   return (
     <div className="theme-page">
-      <h1 className="theme-title">Step-by-Step Visualisation</h1>
-      <p className="theme-subtitle mt-3">
-        Watch how local search algorithms explore team splits move by move.
-      </p>
+      <div className="animate-fade-in-up">
+        <p className="theme-section-title">Replay</p>
+        <h1 className="theme-title mt-2">Step-by-Step Visualisation</h1>
+        <p className="theme-subtitle mt-3">
+          Watch how local search algorithms explore team splits move by move.
+        </p>
+      </div>
 
-      <GraphStatus />
+      <div className="mt-4 animate-fade-in-up delay-1">
+        <GraphStatus />
+      </div>
 
       {/* How does this work? */}
-      <HelpAccordion>
-          <div>
-            <p className="font-semibold text-white">What is this?</p>
-            <p className="theme-note mt-1">
-              This page replays how an algorithm builds its team split, move by move. Blue nodes are Team 1, red nodes are Team 2. Watch as players get swapped between teams to improve the overall match balance.
-            </p>
-          </div>
-          <div>
-            <p className="font-semibold text-white">Reading the graph</p>
-            <p className="theme-note mt-1">
-              Lines between players represent how well they've played together. The algorithm tries to put strongly-connected players on opposite teams. Gold highlighted lines show the connections affected by the current move.
-            </p>
-          </div>
-          <div>
-            <p className="font-semibold text-white">Tip</p>
-            <p className="theme-note mt-1">
-              Click any row in the step history table to jump to that step. The Exhaustive algorithm only shows 2 steps (start → end) because it doesn't make incremental moves.
-            </p>
-          </div>
-      </HelpAccordion>
+      <div className="mt-4 animate-fade-in-up delay-2">
+        <HelpAccordion>
+            <div>
+              <p className="font-semibold text-[#ECE8E1]">What is this?</p>
+              <p className="theme-note mt-1">
+                This page replays how an algorithm builds its team split, move by move. Blue nodes are Team 1, red nodes are Team 2. Watch as players get swapped between teams to improve the overall match balance.
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-[#ECE8E1]">Reading the graph</p>
+              <p className="theme-note mt-1">
+                Lines between players represent how well they've played together. The algorithm tries to put strongly-connected players on opposite teams. Gold highlighted lines show the connections affected by the current move.
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-[#ECE8E1]">Tip</p>
+              <p className="theme-note mt-1">
+                Click any row in the step history table to jump to that step. The Exhaustive algorithm only shows 2 steps (start → end) because it doesn't make incremental moves.
+              </p>
+            </div>
+        </HelpAccordion>
+      </div>
 
       {/* Controls */}
-      <div className="mt-6 flex gap-4 items-end flex-wrap">
+      <div className="mt-6 flex gap-4 items-end flex-wrap animate-fade-in-up delay-3">
         <div>
           <label className="theme-label block">Algorithm</label>
           <select
@@ -158,7 +165,7 @@ export default function Visualise() {
 
       {/* Graph + Step info */}
       {result && step && (
-        <div className="mt-6 flex gap-8 flex-wrap">
+        <div className="mt-6 flex gap-8 flex-wrap animate-fade-in">
           {/* SVG Graph */}
           <div className="theme-panel theme-svg-panel rounded-xl p-4">
             <svg width={700} height={600} className="block">
@@ -185,9 +192,9 @@ export default function Visualise() {
                   <g key={i}>
                     <line
                       x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y}
-                      stroke={involvesMovedPlayer ? "#f59e0b" : isCrossTeam ? "#38bdf8" : "#516179"}
+                      stroke={involvesMovedPlayer ? "#f59e0b" : isCrossTeam ? "#FF4655" : "#1e3048"}
                       strokeWidth={involvesMovedPlayer ? 2.5 : isCrossTeam ? 1.5 : 0.5}
-                      opacity={involvesMovedPlayer ? 0.95 : isCrossTeam ? 0.6 : 0.2}
+                      opacity={involvesMovedPlayer ? 0.95 : isCrossTeam ? 0.4 : 0.2}
                       className="transition-all duration-500"
                     />
                     {involvesMovedPlayer && (
@@ -212,7 +219,8 @@ export default function Visualise() {
                 const inTeam1 = step.team.includes(id);
                 const inTeam2 = step.opposingTeam.includes(id);
                 const isMovedNode = id === movedId;
-                const fill = inTeam1 ? "#3b82f6" : inTeam2 ? "#ef4444" : "#9ca3af";
+                const fill = inTeam1 ? "#38bdf8" : inTeam2 ? "#FF4655" : "#586d82";
+                const strokeColor = inTeam1 ? "#67e8f9" : inTeam2 ? "#ff6b77" : "#768a9e";
                 return (
                   <g key={id}>
                     <title>{getPlayerName(id)}</title>
@@ -226,7 +234,7 @@ export default function Visualise() {
                     <circle
                       cx={pos.x} cy={pos.y} r={22}
                       fill={fill}
-                      stroke="white" strokeWidth={3}
+                      stroke={strokeColor} strokeWidth={2}
                       className="transition-all duration-500"
                     />
                     <text
@@ -235,6 +243,7 @@ export default function Visualise() {
                       dominantBaseline="middle"
                       className="fill-white font-bold select-none"
                       fontSize={10}
+                      fontFamily="JetBrains Mono, monospace"
                     >
                       {getPlayerName(id)}
                     </text>
@@ -244,14 +253,14 @@ export default function Visualise() {
             </svg>
 
             {/* Legend */}
-            <div className="theme-legend mt-2 flex flex-wrap justify-center gap-4 text-sm">
-              <span className="flex items-center gap-1">
-                <span className="inline-block w-3 h-3 rounded-full bg-blue-500" /> Team 1
+            <div className="theme-legend mt-2 flex flex-wrap justify-center gap-5 text-xs font-mono uppercase tracking-wider">
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block w-3 h-3 rounded-full bg-[#38bdf8]" /> Team 1
               </span>
-              <span className="flex items-center gap-1">
-                <span className="inline-block w-3 h-3 rounded-full bg-red-500" /> Team 2
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block w-3 h-3 rounded-full bg-[#FF4655]" /> Team 2
               </span>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1.5">
                 <span className="inline-block h-3 w-3 rounded-full bg-amber-400" /> Current move
               </span>
             </div>
@@ -275,7 +284,7 @@ export default function Visualise() {
           {/* Step info panel */}
           <div className="flex-1 min-w-[260px]">
             {/* Playback controls */}
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-2 mb-4">
               <button
                 onClick={() => setCurrentStep(0)}
                 disabled={currentStep === 0}
@@ -318,11 +327,11 @@ export default function Visualise() {
 
             {/* Step progress bar */}
             <div className="mb-4">
-              <div className="theme-note mb-1 flex justify-between text-xs">
-                <span>Step {currentStep} of {result.steps.length - 1}</span>
+              <div className="theme-note mb-1 flex justify-between text-xs font-mono">
+                <span>Step {currentStep} / {result.steps.length - 1}</span>
                 <span>{result.runtimeMs} ms total</span>
               </div>
-              <div className="theme-loading-track h-2 w-full overflow-hidden rounded-full">
+              <div className="theme-loading-track h-1.5 w-full overflow-hidden rounded-full">
                 <div
                   className="theme-loading-fill h-full rounded-full transition-all duration-300"
                   style={{ width: `${result.steps.length > 1 ? (currentStep / (result.steps.length - 1)) * 100 : 100}%` }}
@@ -334,21 +343,21 @@ export default function Visualise() {
             <div className="theme-panel-subtle space-y-3 rounded-xl p-4">
               <div>
                 <span className="theme-label">Action</span>
-                <p className="mt-2 text-lg font-semibold text-white">{formatPlayerAction(step.action)}</p>
+                <p className="mt-2 text-lg font-semibold text-[#ECE8E1]">{formatPlayerAction(step.action)}</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <span className="theme-label">Team 1 (Blue)</span>
-                  <p className="mt-2 text-sm text-sky-100">{formatPlayerList(step.team)}</p>
+                  <p className="mt-2 text-sm text-[#38bdf8]">{formatPlayerList(step.team)}</p>
                 </div>
                 <div>
                   <span className="theme-label">Team 2 (Red)</span>
-                  <p className="mt-2 text-sm text-rose-100">{formatPlayerList(step.opposingTeam)}</p>
+                  <p className="mt-2 text-sm text-[#FF4655]">{formatPlayerList(step.opposingTeam)}</p>
                 </div>
               </div>
               <div>
                 <span className="theme-label">Score</span>
-                <p className="mt-2 text-2xl font-bold text-white">
+                <p className="mt-2 text-2xl font-bold text-[#ECE8E1]">
                   {Math.round(step.score * 100) / 100}
                 </p>
               </div>
@@ -373,9 +382,9 @@ export default function Visualise() {
                         i === currentStep ? "theme-row-active" : ""
                       }`}
                     >
-                      <td className="theme-note px-3 py-2">{i}</td>
+                      <td className="theme-note px-3 py-2 font-mono">{i}</td>
                       <td className="px-3 py-2">{formatPlayerAction(s.action)}</td>
-                      <td className="theme-mono px-3 py-2 text-right text-white">
+                      <td className="theme-mono px-3 py-2 text-right text-[#ECE8E1]">
                         {Math.round(s.score * 100) / 100}
                       </td>
                     </tr>

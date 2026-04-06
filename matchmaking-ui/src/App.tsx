@@ -6,55 +6,36 @@ import GraphBuilder from "./pages/GraphBuilder";
 import Landing from "./pages/Landing";
 import Visualise from "./pages/Visualise";
 
+const NAV_LINKS = [
+  { to: "/", label: "Home", end: true },
+  { to: "/graph-builder", label: "Graph Builder" },
+  { to: "/dashboard", label: "Dashboard" },
+  { to: "/compare", label: "Compare" },
+  { to: "/visualise", label: "Visualise" },
+] as const;
+
 function AppFrame() {
   return (
     <div className="broadcast-theme">
       <nav className="theme-nav">
-        <div className="theme-nav-inner max-w-7xl mx-auto px-4 flex gap-6 h-16 items-center">
-          <NavLink to="/" end className="theme-brand">
-            MatchMatrix
+        <div className="theme-nav-inner max-w-7xl mx-auto px-4 flex gap-5 h-14 items-center">
+          <NavLink to="/" end className="theme-brand mr-2">
+            Match<span className="theme-brand-accent">/</span>Matrix
           </NavLink>
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) =>
-              isActive ? "theme-nav-link theme-nav-link--active" : "theme-nav-link"
-            }
-          >
-            Home
-          </NavLink>
-          <NavLink
-            to="/graph-builder"
-            className={({ isActive }) =>
-              isActive ? "theme-nav-link theme-nav-link--active" : "theme-nav-link"
-            }
-          >
-            Graph Builder
-          </NavLink>
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              isActive ? "theme-nav-link theme-nav-link--active" : "theme-nav-link"
-            }
-          >
-            Dashboard
-          </NavLink>
-          <NavLink
-            to="/compare"
-            className={({ isActive }) =>
-              isActive ? "theme-nav-link theme-nav-link--active" : "theme-nav-link"
-            }
-          >
-            Compare
-          </NavLink>
-          <NavLink
-            to="/visualise"
-            className={({ isActive }) =>
-              isActive ? "theme-nav-link theme-nav-link--active" : "theme-nav-link"
-            }
-          >
-            Visualise
-          </NavLink>
+          {NAV_LINKS.map(({ to, label, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                isActive
+                  ? "theme-nav-link theme-nav-link--active"
+                  : "theme-nav-link"
+              }
+            >
+              {label}
+            </NavLink>
+          ))}
         </div>
       </nav>
 
