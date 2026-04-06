@@ -8,10 +8,10 @@ import Visualise from "./pages/Visualise";
 
 const NAV_LINKS = [
   { to: "/", label: "Home", end: true },
-  { to: "/graph-builder", label: "Graph Builder" },
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/compare", label: "Compare" },
-  { to: "/visualise", label: "Visualise" },
+  { to: "/graph-builder", label: "Graph Builder", end: undefined },
+  { to: "/dashboard", label: "Dashboard", end: undefined },
+  { to: "/compare", label: "Compare", end: undefined },
+  { to: "/visualise", label: "Visualise", end: undefined },
 ] as const;
 
 function AppFrame() {

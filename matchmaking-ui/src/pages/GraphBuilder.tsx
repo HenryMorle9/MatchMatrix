@@ -10,7 +10,6 @@ export default function GraphBuilder() {
   const { edges, setEdges, status, setStatus, refreshGraph } = useGraph();
   const navigate = useNavigate();
 
-  // Player count for random generation
   const [playerCount, setPlayerCount] = useState("7");
 
   const statusClass = status
@@ -63,7 +62,7 @@ export default function GraphBuilder() {
   return (
     <div className="theme-page space-y-6">
       {/* Header */}
-      <div className="animate-fade-in-up">
+      <div className="animate-fade-in">
         <p className="theme-section-title">Build</p>
         <h1 className="theme-title mt-2">Graph Builder</h1>
         <p className="theme-subtitle mt-3">
@@ -73,22 +72,22 @@ export default function GraphBuilder() {
       </div>
 
       {/* How does this work? */}
-      <div className="animate-fade-in-up delay-1">
+      <div className="animate-fade-in delay-1">
         <HelpAccordion>
           <div>
-            <p className="font-semibold text-[#ECE8E1]">What is this?</p>
+            <p className="font-semibold theme-text-primary">What is this?</p>
             <p className="theme-note mt-1">
               This page creates a network of players with compatibility scores. Think of it like a social network. Each connection between two players has a number showing how well they play together. The higher the number, the better the pairing.
             </p>
           </div>
           <div>
-            <p className="font-semibold text-[#ECE8E1]">How to use</p>
+            <p className="font-semibold theme-text-primary">How to use</p>
             <p className="theme-note mt-1">
               Pick how many players you want, hit Generate Random, then click Load Graph to send it to the matchmaking engine. The other pages (Dashboard, Compare, Visualise) all use this loaded graph.
             </p>
           </div>
           <div>
-            <p className="font-semibold text-[#ECE8E1]">Tip</p>
+            <p className="font-semibold theme-text-primary">Tip</p>
             <p className="theme-note mt-1">
               Start with 7 players to see results instantly. Above 20 players, the exhaustive algorithm will take noticeably longer.
             </p>
@@ -97,7 +96,7 @@ export default function GraphBuilder() {
       </div>
 
       {/* Generate random graph */}
-      <div className="theme-panel rounded-xl p-5 animate-fade-in-up delay-2">
+      <div className="theme-panel rounded p-5 animate-fade-in delay-2">
         <h2 className="theme-section-title mb-3">Generate Graph</h2>
         <div className="flex gap-3 items-end">
           <div>
@@ -106,7 +105,7 @@ export default function GraphBuilder() {
               type="number"
               value={playerCount}
               onChange={(e) => setPlayerCount(e.target.value)}
-              className="theme-input mt-2 w-20 rounded-lg px-3 py-2 text-sm"
+              className="theme-input mt-2 w-20 rounded px-3 py-2 text-sm"
             />
           </div>
           <button
@@ -118,11 +117,10 @@ export default function GraphBuilder() {
         </div>
       </div>
 
-      {/* Performance estimate, Load button, and status — above the table */}
+      {/* Performance estimate, Load button, and status */}
       {edges.length > 0 && (() => {
         const uniquePlayers = new Set(edges.flatMap((e) => [e.p1, e.p2])).size;
 
-        // Calibrated: 2^20 subsets took ~5s on local machine → ~200k/sec
         const SUBSETS_PER_SECOND = 200_000;
         const totalSubsets = 2 ** uniquePlayers;
         const estimatedSeconds = totalSubsets / SUBSETS_PER_SECOND;
@@ -141,11 +139,11 @@ export default function GraphBuilder() {
           if (seconds < 1) return "text-green-500";
           if (seconds < 10) return "text-yellow-500";
           if (seconds < 300) return "text-orange-500";
-          return "text-[#FF4655]";
+          return "text-[var(--color-error)]";
         }
 
         return (
-          <div className="theme-panel-subtle mt-4 rounded-xl p-4 animate-fade-in">
+          <div className="theme-panel-subtle mt-4 rounded p-4 animate-fade-in">
             <h3 className="theme-section-title">
               Estimated Performance ({uniquePlayers} players)
             </h3>
@@ -200,7 +198,7 @@ export default function GraphBuilder() {
 
       {/* Edge list table */}
       {edges.length > 0 && (
-        <div className="theme-panel overflow-hidden rounded-xl animate-fade-in-up">
+        <div className="theme-panel overflow-hidden rounded animate-fade-in">
           <div className="theme-card-header theme-divider border-b px-5 py-3">
             <h2 className="theme-section-title">
               Edges ({edges.length})

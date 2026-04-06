@@ -4,6 +4,7 @@ import type { Step, StepsResult } from "../types/matchmaking";
 import GraphStatus from "../components/GraphStatus";
 import HelpAccordion from "../components/HelpAccordion";
 import { ALGORITHMS } from "../constants/algorithms";
+import { TEAM_COLORS } from "../constants/colors";
 import { parseTeamInput } from "../utils/parseTeamInput";
 import { useGraph } from "../context/GraphContext";
 import {
@@ -90,7 +91,7 @@ export default function Visualise() {
 
   return (
     <div className="theme-page">
-      <div className="animate-fade-in-up">
+      <div className="animate-fade-in">
         <p className="theme-section-title">Replay</p>
         <h1 className="theme-title mt-2">Step-by-Step Visualisation</h1>
         <p className="theme-subtitle mt-3">
@@ -98,27 +99,26 @@ export default function Visualise() {
         </p>
       </div>
 
-      <div className="mt-4 animate-fade-in-up delay-1">
+      <div className="mt-4 animate-fade-in delay-1">
         <GraphStatus />
       </div>
 
-      {/* How does this work? */}
-      <div className="mt-4 animate-fade-in-up delay-2">
+      <div className="mt-4 animate-fade-in delay-2">
         <HelpAccordion>
             <div>
-              <p className="font-semibold text-[#ECE8E1]">What is this?</p>
+              <p className="font-semibold theme-text-primary">What is this?</p>
               <p className="theme-note mt-1">
                 This page replays how an algorithm builds its team split, move by move. Blue nodes are Team 1, red nodes are Team 2. Watch as players get swapped between teams to improve the overall match balance.
               </p>
             </div>
             <div>
-              <p className="font-semibold text-[#ECE8E1]">Reading the graph</p>
+              <p className="font-semibold theme-text-primary">Reading the graph</p>
               <p className="theme-note mt-1">
                 Lines between players represent how well they've played together. The algorithm tries to put strongly-connected players on opposite teams. Gold highlighted lines show the connections affected by the current move.
               </p>
             </div>
             <div>
-              <p className="font-semibold text-[#ECE8E1]">Tip</p>
+              <p className="font-semibold theme-text-primary">Tip</p>
               <p className="theme-note mt-1">
                 Click any row in the step history table to jump to that step. The Exhaustive algorithm only shows 2 steps (start → end) because it doesn't make incremental moves.
               </p>
@@ -127,13 +127,13 @@ export default function Visualise() {
       </div>
 
       {/* Controls */}
-      <div className="mt-6 flex gap-4 items-end flex-wrap animate-fade-in-up delay-3">
+      <div className="mt-6 flex gap-4 items-end flex-wrap animate-fade-in delay-3">
         <div>
           <label className="theme-label block">Algorithm</label>
           <select
             value={algorithm}
             onChange={(e) => { setAlgorithm(e.target.value); setResult(null); setCurrentStep(0); setPlaying(false); }}
-            className="theme-input mt-2 rounded-lg px-3 py-2 text-sm"
+            className="theme-input mt-2 rounded px-3 py-2 text-sm"
           >
             {ALGORITHMS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -149,7 +149,7 @@ export default function Visualise() {
             value={initialTeam}
             onChange={(e) => setInitialTeam(e.target.value)}
             placeholder={`e.g. ${inputExample}`}
-            className="theme-input mt-2 w-48 rounded-lg px-3 py-2 text-sm"
+            className="theme-input mt-2 w-48 rounded px-3 py-2 text-sm"
           />
         </div>
         <button
@@ -167,9 +167,9 @@ export default function Visualise() {
       {result && step && (
         <div className="mt-6 flex gap-8 flex-wrap animate-fade-in">
           {/* SVG Graph */}
-          <div className="theme-panel theme-svg-panel rounded-xl p-4">
+          <div className="theme-panel theme-svg-panel rounded p-4">
             <svg width={700} height={600} className="block">
-              {/* Edges — faint by default, highlighted if crossing teams */}
+              {/* Edges */}
               {edges.map((edge, i) => {
                 const p1 = positions[edge.p1];
                 const p2 = positions[edge.p2];
@@ -178,9 +178,7 @@ export default function Visualise() {
                 const p2InT1 = step.team.includes(edge.p2);
                 const isCrossTeam = p1InT1 !== p2InT1;
                 const involvesMovedPlayer = movedId !== null && (edge.p1 === movedId || edge.p2 === movedId);
-                // Position the weight label on the outside of the ring, near the other node
                 const otherNode = edge.p1 === movedId ? p2 : p1;
-                // Direction from center of ring outward through the other node
                 const cx = 350, cy = 300;
                 const dx = otherNode.x - cx;
                 const dy = otherNode.y - cy;
@@ -192,7 +190,7 @@ export default function Visualise() {
                   <g key={i}>
                     <line
                       x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y}
-                      stroke={involvesMovedPlayer ? "#f59e0b" : isCrossTeam ? "#FF4655" : "#1e3048"}
+                      stroke={involvesMovedPlayer ? TEAM_COLORS.highlight : isCrossTeam ? TEAM_COLORS.crossTeamEdge : TEAM_COLORS.sameTeamEdge}
                       strokeWidth={involvesMovedPlayer ? 2.5 : isCrossTeam ? 1.5 : 0.5}
                       opacity={involvesMovedPlayer ? 0.95 : isCrossTeam ? 0.4 : 0.2}
                       className="transition-all duration-500"
@@ -219,15 +217,15 @@ export default function Visualise() {
                 const inTeam1 = step.team.includes(id);
                 const inTeam2 = step.opposingTeam.includes(id);
                 const isMovedNode = id === movedId;
-                const fill = inTeam1 ? "#38bdf8" : inTeam2 ? "#FF4655" : "#586d82";
-                const strokeColor = inTeam1 ? "#67e8f9" : inTeam2 ? "#ff6b77" : "#768a9e";
+                const fill = inTeam1 ? TEAM_COLORS.team1 : inTeam2 ? TEAM_COLORS.team2 : TEAM_COLORS.neutral;
+                const strokeColor = inTeam1 ? TEAM_COLORS.team1Stroke : inTeam2 ? TEAM_COLORS.team2Stroke : TEAM_COLORS.neutralStroke;
                 return (
                   <g key={id}>
                     <title>{getPlayerName(id)}</title>
                     {isMovedNode && (
                       <circle
                         cx={pos.x} cy={pos.y} r={28}
-                        fill="none" stroke="#f59e0b" strokeWidth={3}
+                        fill="none" stroke={TEAM_COLORS.highlight} strokeWidth={3}
                         className="transition-all duration-500"
                       />
                     )}
@@ -255,19 +253,19 @@ export default function Visualise() {
             {/* Legend */}
             <div className="theme-legend mt-2 flex flex-wrap justify-center gap-5 text-xs font-mono uppercase tracking-wider">
               <span className="flex items-center gap-1.5">
-                <span className="inline-block w-3 h-3 rounded-full bg-[#38bdf8]" /> Team 1
+                <span className="inline-block w-3 h-3 rounded-sm" style={{ background: TEAM_COLORS.team1 }} /> Team 1
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="inline-block w-3 h-3 rounded-full bg-[#FF4655]" /> Team 2
+                <span className="inline-block w-3 h-3 rounded-sm" style={{ background: TEAM_COLORS.team2 }} /> Team 2
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="inline-block h-3 w-3 rounded-full bg-amber-400" /> Current move
+                <span className="inline-block h-3 w-3 rounded-sm bg-amber-400" /> Current move
               </span>
             </div>
 
             {/* Algorithm explanation for guaranteed */}
             {result?.algorithm === "guaranteedBestTeam" && (
-              <div className="theme-info-banner mt-3 rounded-lg px-4 py-3 text-sm">
+              <div className="theme-info-banner mt-3 rounded px-4 py-3 text-sm">
                 <p className="font-semibold">Why only 2 steps?</p>
                 <p className="mt-1">
                   The Guaranteed Best algorithm doesn't make moves like local search.
@@ -331,40 +329,40 @@ export default function Visualise() {
                 <span>Step {currentStep} / {result.steps.length - 1}</span>
                 <span>{result.runtimeMs} ms total</span>
               </div>
-              <div className="theme-loading-track h-1.5 w-full overflow-hidden rounded-full">
+              <div className="theme-loading-track h-1.5 w-full overflow-hidden rounded-sm">
                 <div
-                  className="theme-loading-fill h-full rounded-full transition-all duration-300"
+                  className="theme-loading-fill h-full rounded-sm transition-all duration-300"
                   style={{ width: `${result.steps.length > 1 ? (currentStep / (result.steps.length - 1)) * 100 : 100}%` }}
                 />
               </div>
             </div>
 
             {/* Current step details */}
-            <div className="theme-panel-subtle space-y-3 rounded-xl p-4">
+            <div className="theme-panel-subtle space-y-3 rounded p-4">
               <div>
                 <span className="theme-label">Action</span>
-                <p className="mt-2 text-lg font-semibold text-[#ECE8E1]">{formatPlayerAction(step.action)}</p>
+                <p className="mt-2 text-lg font-semibold theme-text-primary">{formatPlayerAction(step.action)}</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <span className="theme-label">Team 1 (Blue)</span>
-                  <p className="mt-2 text-sm text-[#38bdf8]">{formatPlayerList(step.team)}</p>
+                  <p className="mt-2 text-sm" style={{ color: TEAM_COLORS.team1 }}>{formatPlayerList(step.team)}</p>
                 </div>
                 <div>
                   <span className="theme-label">Team 2 (Red)</span>
-                  <p className="mt-2 text-sm text-[#FF4655]">{formatPlayerList(step.opposingTeam)}</p>
+                  <p className="mt-2 text-sm" style={{ color: TEAM_COLORS.team2 }}>{formatPlayerList(step.opposingTeam)}</p>
                 </div>
               </div>
               <div>
                 <span className="theme-label">Score</span>
-                <p className="mt-2 text-2xl font-bold text-[#ECE8E1]">
+                <p className="mt-2 text-2xl font-bold theme-text-primary">
                   {Math.round(step.score * 100) / 100}
                 </p>
               </div>
             </div>
 
             {/* Step history */}
-            <div className="theme-panel mt-4 overflow-hidden rounded-xl">
+            <div className="theme-panel mt-4 overflow-hidden rounded">
               <table className="theme-table w-full text-sm">
                 <thead className="theme-card-header">
                   <tr>
@@ -384,7 +382,7 @@ export default function Visualise() {
                     >
                       <td className="theme-note px-3 py-2 font-mono">{i}</td>
                       <td className="px-3 py-2">{formatPlayerAction(s.action)}</td>
-                      <td className="theme-mono px-3 py-2 text-right text-[#ECE8E1]">
+                      <td className="theme-mono px-3 py-2 text-right theme-text-primary">
                         {Math.round(s.score * 100) / 100}
                       </td>
                     </tr>

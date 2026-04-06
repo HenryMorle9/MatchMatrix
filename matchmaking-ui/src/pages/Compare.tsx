@@ -4,6 +4,7 @@ import type { MatchmakingResult } from "../types/matchmaking";
 import GraphStatus from "../components/GraphStatus";
 import HelpAccordion from "../components/HelpAccordion";
 import { ALGORITHM_LABELS } from "../constants/algorithms";
+import { TEAM_COLORS } from "../constants/colors";
 import { useGraph } from "../context/GraphContext";
 import { parseTeamInput } from "../utils/parseTeamInput";
 import { formatPlayerList, getPlayerName } from "../utils/playerNames";
@@ -41,7 +42,6 @@ export default function Compare() {
     }
   }
 
-  // Find the best score and fastest runtime
   const bestScore = results.length > 0
     ? Math.max(...results.map((r) => r.score))
     : 0;
@@ -52,7 +52,7 @@ export default function Compare() {
 
   return (
     <div className="theme-page">
-      <div className="animate-fade-in-up">
+      <div className="animate-fade-in">
         <p className="theme-section-title">Benchmark</p>
         <h1 className="theme-title mt-2">Algorithm Comparison</h1>
         <p className="theme-subtitle mt-3">
@@ -61,27 +61,26 @@ export default function Compare() {
         </p>
       </div>
 
-      <div className="mt-4 animate-fade-in-up delay-1">
+      <div className="mt-4 animate-fade-in delay-1">
         <GraphStatus />
       </div>
 
-      {/* How does this work? */}
-      <div className="mt-4 animate-fade-in-up delay-2">
+      <div className="mt-4 animate-fade-in delay-1">
         <HelpAccordion>
             <div>
-              <p className="font-semibold text-[#ECE8E1]">What is this?</p>
+              <p className="font-semibold theme-text-primary">What is this?</p>
               <p className="theme-note mt-1">
                 This page runs all three algorithms on the same graph and shows you how they compare. You'll see which one found the best team split (Most Accurate) and which one was quickest (Fastest).
               </p>
             </div>
             <div>
-              <p className="font-semibold text-[#ECE8E1]">Why do scores differ?</p>
+              <p className="font-semibold theme-text-primary">Why do scores differ?</p>
               <p className="theme-note mt-1">
                 Local Search algorithms take shortcuts. This means they're fast but can get stuck on a "good enough" answer. The Exhaustive algorithm checks everything and always finds the best answer, but takes much, much longer.
               </p>
             </div>
             <div>
-              <p className="font-semibold text-[#ECE8E1]">Tip</p>
+              <p className="font-semibold theme-text-primary">Tip</p>
               <p className="theme-note mt-1">
                 This is the best page to demonstrate the trade-off between speed and accuracy.
               </p>
@@ -90,7 +89,7 @@ export default function Compare() {
       </div>
 
       {/* Controls */}
-      <div className="mt-6 flex gap-4 items-end animate-fade-in-up delay-3">
+      <div className="mt-6 flex gap-4 items-end animate-fade-in delay-2">
         <div>
           <label className="theme-label block">
             Initial Team (optional)
@@ -100,7 +99,7 @@ export default function Compare() {
             value={initialTeam}
             onChange={(e) => setInitialTeam(e.target.value)}
             placeholder={`e.g. ${inputExample}`}
-            className="theme-input mt-2 w-48 rounded-lg px-3 py-2 text-sm"
+            className="theme-input mt-2 w-48 rounded px-3 py-2 text-sm"
           />
         </div>
         <button
@@ -117,8 +116,8 @@ export default function Compare() {
           <p className="theme-note mb-2 text-sm">
             Running all three algorithms — exhaustive search may take a while on large graphs...
           </p>
-          <div className="theme-loading-track h-1.5 w-full overflow-hidden rounded-full">
-            <div className="theme-loading-fill h-full w-full animate-pulse rounded-full" />
+          <div className="theme-loading-track h-1.5 w-full overflow-hidden rounded-sm">
+            <div className="theme-loading-fill h-full w-full animate-pulse rounded-sm" />
           </div>
         </div>
       )}
@@ -127,7 +126,7 @@ export default function Compare() {
 
       {/* Results table */}
       {results.length > 0 && (
-        <div className="theme-panel mt-6 overflow-hidden rounded-xl animate-scale-in">
+        <div className="theme-panel mt-6 overflow-hidden rounded animate-scale-in">
           <table className="theme-table w-full text-left text-sm">
             <thead className="theme-card-header">
               <tr>
@@ -144,18 +143,18 @@ export default function Compare() {
                   key={r.algorithm}
                   className="theme-divider border-b"
                 >
-                  <td className="px-4 py-3 font-medium text-[#ECE8E1]">
+                  <td className="px-4 py-3 font-medium theme-text-primary">
                     {ALGORITHM_LABELS[r.algorithm] ?? r.algorithm}
                   </td>
                   <td className="px-4 py-3">
                     <p className="theme-label">({r.team.length} players)</p>
-                    <p className="mt-1 text-[#38bdf8]">{formatPlayerList(r.team)}</p>
+                    <p className="mt-1" style={{ color: TEAM_COLORS.team1 }}>{formatPlayerList(r.team)}</p>
                   </td>
                   <td className="px-4 py-3">
                     <p className="theme-label">({r.opposingTeam.length} players)</p>
-                    <p className="mt-1 text-[#FF4655]">{formatPlayerList(r.opposingTeam)}</p>
+                    <p className="mt-1" style={{ color: TEAM_COLORS.team2 }}>{formatPlayerList(r.opposingTeam)}</p>
                   </td>
-                  <td className="px-4 py-3 font-bold text-[#ECE8E1]">
+                  <td className="px-4 py-3 font-bold theme-text-primary">
                     {Math.round(r.score * 100) / 100}
                     {r.score === bestScore && (
                       <span className="theme-chip-success ml-2">

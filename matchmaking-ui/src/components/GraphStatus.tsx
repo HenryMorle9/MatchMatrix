@@ -8,11 +8,11 @@ export default function GraphStatus() {
 
   if (!graphLoaded) {
     return (
-      <div className="theme-panel-subtle rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+      <div className="theme-panel-subtle rounded px-4 py-3 text-sm flex items-center gap-2">
         <span className="text-amber-400">&#9888;</span>
         <span className="theme-note">
           No graph loaded yet —{" "}
-          <Link to="/graph-builder" className="text-sky-400 underline hover:text-sky-300">
+          <Link to="/graph-builder" className="text-[var(--color-accent)] underline hover:opacity-80">
             go to Graph Builder
           </Link>{" "}
           to create one.
@@ -22,7 +22,7 @@ export default function GraphStatus() {
   }
 
   return (
-    <div className="theme-panel-subtle rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+    <div className="theme-panel-subtle rounded px-4 py-3 text-sm flex items-center gap-2">
       <span className="text-green-400">&#10003;</span>
       <span className="theme-note">
         Graph loaded: {allPlayers.length} players, {apiEdges.length} edges
