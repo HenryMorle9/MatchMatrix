@@ -66,6 +66,32 @@
   animation: scaleIn 0.35s ease-out both;
 }
 
+/* ── Rotating text ────────────────────────────────────── */
+
+.rotating-word {
+  display: inline;
+  transition: opacity 0.15s ease-out;
+}
+
+.rotating-word--removing {
+  opacity: 0;
+}
+
+.rotating-word--adding {
+  opacity: 0;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* ── Reduced motion ───────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .rotating-word--removing,
+  .rotating-word--adding {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 .delay-1 { animation-delay: 0.08s; }
 .delay-2 { animation-delay: 0.16s; }
 .delay-3 { animation-delay: 0.24s; }

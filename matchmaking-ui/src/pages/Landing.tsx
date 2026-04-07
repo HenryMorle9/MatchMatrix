@@ -1,6 +1,8 @@
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { getPlayerName } from "../utils/playerNames";
 import { TEAM_COLORS } from "../constants/colors";
+import RotatingText from "../components/RotatingText";
 
 const workflowCards = [
   {
@@ -37,7 +39,13 @@ const workflowCards = [
   },
 ];
 
-const spotlightNodes = [
+const HERO_PREFIX = ["Explore", "how", "graph-based", "algorithms"];
+const HERO_SUFFIXES = [
+  ["balance", "teams", "in", "FPS", "matchmaking."],
+  ["evaluate", "player", "synergy", "across", "matches."],
+];
+
+const initialNodes = [
   { id: 0, x: 160, y: 32, fill: TEAM_COLORS.team1 },
   { id: 1, x: 246, y: 70, fill: TEAM_COLORS.team1 },
   { id: 2, x: 282, y: 154, fill: TEAM_COLORS.team1 },
@@ -76,6 +84,32 @@ const previewCards = [
 ];
 
 export default function Landing() {
+  const [nodes, setNodes] = useState(initialNodes);
+  const intervalRef = useRef<ReturnType<typeof setInterval>>(undefined);
+
+  // Node cycling: randomly swap 1-2 nodes between teams every 2s
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      setNodes((prev) => {
+        const next = [...prev];
+        const swapCount = Math.random() < 0.5 ? 1 : 2;
+        for (let s = 0; s < swapCount; s++) {
+          const idx = Math.floor(Math.random() * next.length);
+          const node = next[idx];
+          next[idx] = {
+            ...node,
+            fill:
+              node.fill === TEAM_COLORS.team1
+                ? TEAM_COLORS.team2
+                : TEAM_COLORS.team1,
+          };
+        }
+        return next;
+      });
+    }, 2000);
+    return () => clearInterval(intervalRef.current);
+  }, []);
+
   return (
     <div className="theme-page theme-home space-y-16">
       {/* ── Hero ─────────────────────────────────────── */}
@@ -89,9 +123,12 @@ export default function Landing() {
             <h1 className="theme-title animate-fade-in-up delay-1">
               Match<span className="text-[var(--color-accent)]">/</span>Matrix
             </h1>
-            <p className="animate-fade-in delay-2 max-w-4xl text-xl font-medium leading-relaxed theme-text-primary sm:text-2xl">
-              Explore how graph-based algorithms balance teams in FPS matchmaking.
-            </p>
+            <RotatingText
+              prefix={HERO_PREFIX}
+              suffixes={HERO_SUFFIXES}
+              className="animate-fade-in delay-2 max-w-4xl text-xl font-medium leading-relaxed theme-text-primary sm:text-2xl min-h-[4.1rem] sm:min-h-[5rem]"
+              dynamicClassName="text-white"
+            />
             <p className="theme-subtitle animate-fade-in delay-3">
               A technical portfolio app built on a data structures &amp; algorithms
               foundation — load a player graph, run matchmaking algorithms, and
@@ -137,8 +174,8 @@ export default function Landing() {
             <div className="theme-panel-subtle rounded p-3">
               <svg viewBox="0 0 320 310" className="h-auto w-full">
                 {spotlightEdges.map(([start, end], index) => {
-                  const from = spotlightNodes[start];
-                  const to = spotlightNodes[end];
+                  const from = nodes[start];
+                  const to = nodes[end];
                   const isCross = from.fill !== to.fill;
                   return (
                     <line
@@ -150,10 +187,11 @@ export default function Landing() {
                       stroke={isCross ? TEAM_COLORS.crossTeamEdge : TEAM_COLORS.sameTeamEdge}
                       strokeWidth={isCross ? 1.5 : 1}
                       opacity={isCross ? 0.35 : 0.5}
+                      className="transition-all duration-500"
                     />
                   );
                 })}
-                {spotlightNodes.map((node) => (
+                {nodes.map((node) => (
                   <g key={node.id}>
                     <circle
                       cx={node.x}
@@ -168,6 +206,7 @@ export default function Landing() {
                       fill={node.fill}
                       stroke={node.fill === TEAM_COLORS.team2 ? TEAM_COLORS.team2Stroke : TEAM_COLORS.team1Stroke}
                       strokeWidth="2"
+                      className="transition-all duration-500"
                     />
                     <text
                       x={node.x}
