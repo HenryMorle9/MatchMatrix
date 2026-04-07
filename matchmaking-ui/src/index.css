@@ -272,6 +272,19 @@ body {
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
 }
 
+.broadcast-theme .theme-status-icon {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.broadcast-theme .theme-status-icon--loaded {
+  color: var(--color-accent);
+}
+
+.broadcast-theme .theme-status-icon--warning {
+  color: #b7791f;
+}
+
 .broadcast-theme .theme-help {
   border: 1px solid var(--color-border-subtle);
   background: transparent;
@@ -342,6 +355,10 @@ body {
   border: 1px solid rgba(0, 0, 0, 0.15);
   background: #ffffff;
   color: var(--color-text-primary);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
 }
 
 .broadcast-theme .theme-input::placeholder {
@@ -367,7 +384,10 @@ body {
   text-transform: uppercase;
   transition:
     box-shadow 200ms ease,
-    background-color 200ms ease;
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease,
+    opacity 200ms ease;
 }
 
 .broadcast-theme .theme-btn-primary {
@@ -417,6 +437,26 @@ body {
   border: 1px solid rgba(204, 0, 0, 0.3);
   background: rgba(204, 0, 0, 0.08);
   color: #CC0000;
+}
+
+.broadcast-theme .theme-btn-danger:hover {
+  background: rgba(204, 0, 0, 0.12);
+}
+
+.broadcast-theme .theme-btn-primary:focus-visible,
+.broadcast-theme .theme-btn-secondary:focus-visible,
+.broadcast-theme .theme-btn-accent:focus-visible,
+.broadcast-theme .theme-btn-danger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-accent-muted);
+}
+
+.broadcast-theme .theme-btn-primary:disabled,
+.broadcast-theme .theme-btn-secondary:disabled,
+.broadcast-theme .theme-btn-accent:disabled,
+.broadcast-theme .theme-btn-danger:disabled {
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* ── Text utilities ────────────────────────────────────── */
@@ -510,6 +550,91 @@ body {
   text-transform: uppercase;
 }
 
+/* ── Tool Layout Helpers ───────────────────────────────── */
+
+.broadcast-theme .theme-console-panel {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.broadcast-theme .theme-console-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.broadcast-theme .theme-console-title {
+  color: var(--color-text-primary);
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.broadcast-theme .theme-console-copy {
+  max-width: 60ch;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+.broadcast-theme .theme-preview-list {
+  display: grid;
+  gap: 0.6rem;
+  color: var(--color-text-muted);
+}
+
+.broadcast-theme .theme-preview-list strong {
+  color: var(--color-text-primary);
+}
+
+.broadcast-theme .theme-compare-row {
+  display: grid;
+  gap: 1rem;
+  padding: 1.15rem 1.5rem;
+}
+
+.broadcast-theme .theme-stage-placeholder {
+  min-height: 34rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.broadcast-theme .theme-stage-empty {
+  width: min(100%, 30rem);
+  border: 1px dashed rgba(56, 42, 18, 0.2);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(247, 241, 229, 0.45));
+  padding: 1.5rem;
+  text-align: left;
+}
+
+.broadcast-theme .theme-stage-empty-title {
+  color: var(--color-text-primary);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.broadcast-theme .theme-stage-empty-copy {
+  margin-top: 0.75rem;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+.broadcast-theme .theme-stage-meta {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.broadcast-theme .theme-stage-meta > div {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 0.9rem 1rem;
+}
+
 /* ── SVG Panel ─────────────────────────────────────────── */
 
 .broadcast-theme .theme-svg-panel {
@@ -579,6 +704,13 @@ body {
 
 /* ── Responsive ────────────────────────────────────────── */
 
+@media (min-width: 768px) {
+  .broadcast-theme .theme-compare-row {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.72fr) minmax(0, 0.72fr);
+    align-items: start;
+  }
+}
+
 @media (max-width: 640px) {
   .broadcast-theme .theme-page {
     padding-left: 1rem;
@@ -587,5 +719,9 @@ body {
 
   .broadcast-theme .theme-brand {
     font-size: 1.15rem;
+  }
+
+  .broadcast-theme .theme-stage-placeholder {
+    min-height: 24rem;
   }
 }

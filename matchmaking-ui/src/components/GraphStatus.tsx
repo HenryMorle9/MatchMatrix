@@ -9,7 +9,7 @@ export default function GraphStatus() {
   if (!graphLoaded) {
     return (
       <div className="theme-status-pill rounded px-4 py-3 text-sm">
-        <span className="text-amber-400">&#9888;</span>
+        <span className="theme-status-icon theme-status-icon--warning">&#9888;</span>
         <span className="theme-note">
           No graph loaded yet —{" "}
           <Link to="/graph-builder" className="text-[var(--color-accent)] underline hover:opacity-80">
@@ -23,7 +23,7 @@ export default function GraphStatus() {
 
   return (
     <div className="theme-status-pill rounded px-4 py-3 text-sm">
-      <span className="text-green-400">&#10003;</span>
+      <span className="theme-status-icon theme-status-icon--loaded">&#10003;</span>
       <span className="theme-note">
         Graph loaded: {allPlayers.length} players, {apiEdges.length} edges
       </span>

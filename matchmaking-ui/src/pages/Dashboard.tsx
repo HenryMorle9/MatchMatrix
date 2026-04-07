@@ -2,11 +2,48 @@ import { useRef, useState } from "react";
 import { runAlgorithm } from "../api/matchmaking";
 import type { MatchmakingResult } from "../types/matchmaking";
 import GraphStatus from "../components/GraphStatus";
-import HelpAccordion from "../components/HelpAccordion";
 import { ALGORITHMS } from "../constants/algorithms";
 import { useGraph } from "../context/GraphContext";
 import { parseTeamInput } from "../utils/parseTeamInput";
 import { formatPlayerList, getPlayerName } from "../utils/playerNames";
+
+const DASHBOARD_MODES: Record<string, {
+  eyebrow: string;
+  title: string;
+  description: string;
+  bullets: string[];
+}> = {
+  localSearchFirst: {
+    eyebrow: "Fastest Read",
+    title: "Local Search (First Improvement)",
+    description: "Stops as soon as it finds a better swap, which makes it the quickest way to sanity-check a graph.",
+    bullets: [
+      "Best for rapid iteration on freshly generated graphs.",
+      "Good when you want to test several starting teams quickly.",
+      "Can settle on a good-enough split rather than the best one.",
+    ],
+  },
+  localSearchBest: {
+    eyebrow: "Balanced Heuristic",
+    title: "Local Search (Best Improvement)",
+    description: "Checks every possible swap each round before choosing the strongest one, so it trades a little speed for better decisions.",
+    bullets: [
+      "A strong default when you want a solid split without exhaustive search.",
+      "Useful for showing the value of a smarter heuristic.",
+      "Still much faster than checking every possible team combination.",
+    ],
+  },
+  guaranteedBestTeam: {
+    eyebrow: "Exact Result",
+    title: "Guaranteed Best Team",
+    description: "Exhaustive search checks every valid team combination and returns the exact best split for the current graph.",
+    bullets: [
+      "Most accurate option for small-to-medium graphs.",
+      "Best for demonstrating the assignment's exact optimum.",
+      "Slows down sharply as the player count climbs.",
+    ],
+  },
+};
 
 export default function Dashboard() {
   const { allPlayers } = useGraph();
@@ -20,6 +57,7 @@ export default function Dashboard() {
   const inputExample = [allPlayers[0] ?? 0, allPlayers[1] ?? 5]
     .map(getPlayerName)
     .join(", ");
+  const selectedMode = DASHBOARD_MODES[algorithm] ?? DASHBOARD_MODES.localSearchFirst;
 
   function formatScore(score: number) {
     return new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 }).format(score);
@@ -65,89 +103,105 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <div className="mt-4 animate-fade-in delay-1">
-        <GraphStatus />
-      </div>
+      <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(19rem,0.85fr)]">
+        <section className="theme-panel rounded p-6 animate-scale-in">
+          <div className="theme-console-panel">
+            <div className="theme-console-header">
+              <div>
+                <p className="theme-section-title">Run A Match</p>
+                <h2 className="theme-console-title mt-2">
+                  Choose one algorithm and inspect the split.
+                </h2>
+                <p className="theme-console-copy mt-3">
+                  This page is for one focused run at a time. Pick a search strategy,
+                  optionally seed Team 1, and inspect the resulting balance.
+                </p>
+              </div>
+              <GraphStatus />
+            </div>
 
-      <div className="mt-4 animate-fade-in delay-2">
-        <HelpAccordion>
-          <p className="theme-help-copy">
-            Run one algorithm on the loaded graph and inspect the split it produces.
-          </p>
-          <ul className="theme-help-list">
-            <li><strong>First</strong>: stops at the first better swap.</li>
-            <li><strong>Best</strong>: checks every swap before choosing.</li>
-            <li><strong>Exhaustive</strong>: finds the exact split, but slows down above about 20 players.</li>
-            <li><strong>Initial Team</strong>: only use it when you want to test a specific starting point.</li>
-          </ul>
-        </HelpAccordion>
-      </div>
+            <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)_auto] md:items-end">
+              <div>
+                <label className="theme-label block">
+                  Algorithm
+                </label>
+                <select
+                  value={algorithm}
+                  onChange={(e) => setAlgorithm(e.target.value)}
+                  className="theme-input mt-2 w-full rounded px-3 py-2.5 text-sm"
+                >
+                  {ALGORITHMS.map((a) => (
+                    <option key={a.value} value={a.value}>
+                      {a.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-      {/* Controls */}
-      <div className="mt-6 flex gap-4 items-end animate-fade-in delay-3">
-        <div>
-          <label className="theme-label block">
-            Algorithm
-          </label>
-          <select
-            value={algorithm}
-            onChange={(e) => setAlgorithm(e.target.value)}
-            className="theme-input mt-2 rounded px-3 py-2 text-sm"
-          >
-            {ALGORITHMS.map((a) => (
-              <option key={a.value} value={a.value}>
-                {a.label}
-              </option>
-            ))}
-          </select>
-        </div>
+              <div>
+                <label className="theme-label block">
+                  Initial Team (optional)
+                </label>
+                <input
+                  type="text"
+                  value={initialTeam}
+                  onChange={(e) => setInitialTeam(e.target.value)}
+                  placeholder={`e.g. ${inputExample}`}
+                  className="theme-input mt-2 w-full rounded px-3 py-2.5 text-sm"
+                />
+              </div>
 
-        <div>
-          <label className="theme-label block">
-            Initial Team (optional)
-          </label>
-          <input
-            type="text"
-            value={initialTeam}
-            onChange={(e) => setInitialTeam(e.target.value)}
-            placeholder={`e.g. ${inputExample}`}
-            className="theme-input mt-2 w-48 rounded px-3 py-2 text-sm"
-          />
-        </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleRun}
+                  disabled={loading}
+                  className="theme-btn-primary min-h-11 px-6 py-2 text-sm"
+                >
+                  {loading ? "Running..." : "Run"}
+                </button>
+                {loading && (
+                  <button
+                    onClick={handleCancel}
+                    className="theme-btn-danger min-h-11 px-4 py-2 text-sm"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </div>
 
-        <button
-          onClick={handleRun}
-          disabled={loading}
-          className="theme-btn-primary px-6 py-2 text-sm disabled:opacity-50"
-        >
-          {loading ? "Running..." : "Run"}
-        </button>
-        {loading && (
-          <button
-            onClick={handleCancel}
-            className="theme-btn-danger px-4 py-2 text-sm"
-          >
-            Cancel
-          </button>
-        )}
-      </div>
+            {loading && (
+              <div className="animate-fade-in">
+                <p className="theme-note mb-2 text-sm">
+                  Running algorithm — exhaustive search may take a while on large graphs...
+                </p>
+                <div className="theme-loading-track h-1.5 w-full overflow-hidden rounded-sm">
+                  <div className="theme-loading-fill h-full w-full animate-pulse rounded-sm" />
+                </div>
+              </div>
+            )}
 
-      {/* Loading bar */}
-      {loading && (
-        <div className="mt-4 animate-fade-in">
-          <p className="theme-note mb-2 text-sm">
-            Running algorithm — exhaustive search may take a while on large graphs...
-          </p>
-          <div className="theme-loading-track h-1.5 w-full overflow-hidden rounded-sm">
-            <div className="theme-loading-fill h-full w-full animate-pulse rounded-sm" />
+            {error && (
+              <p className="theme-error text-sm">{error}</p>
+            )}
           </div>
-        </div>
-      )}
+        </section>
 
-      {/* Error */}
-      {error && (
-        <p className="theme-error mt-4 text-sm">{error}</p>
-      )}
+        <aside className="theme-panel-subtle rounded p-5 animate-fade-in delay-1">
+          <p className="theme-label">{selectedMode.eyebrow}</p>
+          <h3 className="mt-2 text-xl font-bold theme-text-primary">
+            {selectedMode.title}
+          </h3>
+          <p className="theme-note mt-3">
+            {selectedMode.description}
+          </p>
+          <ul className="theme-preview-list mt-4 text-sm">
+            {selectedMode.bullets.map((bullet) => (
+              <li key={bullet}>{bullet}</li>
+            ))}
+          </ul>
+        </aside>
+      </div>
 
       {/* Result card */}
       {result && (

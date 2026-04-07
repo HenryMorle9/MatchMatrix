@@ -2,11 +2,31 @@ import { useState } from "react";
 import { compareAlgorithms } from "../api/matchmaking";
 import type { MatchmakingResult } from "../types/matchmaking";
 import GraphStatus from "../components/GraphStatus";
-import HelpAccordion from "../components/HelpAccordion";
 import { ALGORITHM_LABELS } from "../constants/algorithms";
 import { useGraph } from "../context/GraphContext";
 import { parseTeamInput } from "../utils/parseTeamInput";
 import { formatPlayerList, getPlayerName } from "../utils/playerNames";
+
+const COMPARE_PREVIEW_ROWS = [
+  {
+    label: "Local Search (First Improvement)",
+    summary: "Takes the first swap that helps. It is the fastest way to see how a heuristic behaves on the graph.",
+    speed: "Very fast",
+    bestFor: "Quick comparisons and starting-point experiments",
+  },
+  {
+    label: "Local Search (Best Improvement)",
+    summary: "Checks every swap each round before choosing. Slightly slower, but usually lands on a stronger split.",
+    speed: "Fast",
+    bestFor: "A balanced trade-off between speed and quality",
+  },
+  {
+    label: "Guaranteed Best Team",
+    summary: "Evaluates every possible split and returns the exact best result. Ideal when you want the true benchmark.",
+    speed: "Slowest",
+    bestFor: "Small graphs and final accuracy checks",
+  },
+] as const;
 
 export default function Compare() {
   const { allPlayers } = useGraph();
@@ -65,57 +85,83 @@ export default function Compare() {
         </p>
       </div>
 
-      <div className="mt-4 animate-fade-in delay-1">
-        <GraphStatus />
-      </div>
-
-      <div className="mt-4 animate-fade-in delay-1">
-        <HelpAccordion>
-          <p className="theme-help-copy">
-            Use this page when you want to compare speed and score on one graph.
-          </p>
-          <ul className="theme-help-list">
-            <li><strong>Local search</strong> is faster, but may stop on a good-enough answer.</li>
-            <li><strong>Exhaustive</strong> is slower, but always finds the best split.</li>
-          </ul>
-        </HelpAccordion>
-      </div>
-
-      {/* Controls */}
-      <div className="mt-6 flex gap-4 items-end animate-fade-in delay-2">
-        <div>
-          <label className="theme-label block">
-            Initial Team (optional)
-          </label>
-          <input
-            type="text"
-            value={initialTeam}
-            onChange={(e) => setInitialTeam(e.target.value)}
-            placeholder={`e.g. ${inputExample}`}
-            className="theme-input mt-2 w-48 rounded px-3 py-2 text-sm"
-          />
-        </div>
-        <button
-          onClick={handleCompare}
-          disabled={loading}
-          className="theme-btn-primary px-6 py-2 text-sm disabled:opacity-50"
-        >
-          {loading ? "Comparing..." : "Compare All"}
-        </button>
-      </div>
-
-      {loading && (
-        <div className="mt-4 animate-fade-in">
-          <p className="theme-note mb-2 text-sm">
-            Running all three algorithms — exhaustive search may take a while on large graphs...
-          </p>
-          <div className="theme-loading-track h-1.5 w-full overflow-hidden rounded-sm">
-            <div className="theme-loading-fill h-full w-full animate-pulse rounded-sm" />
+      <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(19rem,0.8fr)]">
+        <section className="theme-panel overflow-hidden rounded animate-scale-in">
+          <div className="px-6 py-5 theme-divider border-b">
+            <p className="theme-section-title">Benchmark Board</p>
+            <h2 className="theme-console-title mt-2">
+              See the three search styles side by side before you run.
+            </h2>
+            <p className="theme-console-copy mt-3">
+              Compare is your benchmark page. It runs all three approaches on the
+              same graph so you can weigh exactness against runtime.
+            </p>
           </div>
-        </div>
-      )}
+          <div>
+            {COMPARE_PREVIEW_ROWS.map((row) => (
+              <div key={row.label} className="theme-compare-row theme-divider border-t first:border-t-0">
+                <div>
+                  <p className="font-semibold theme-text-primary">{row.label}</p>
+                  <p className="theme-note mt-1">{row.summary}</p>
+                </div>
+                <div>
+                  <p className="theme-label">Speed</p>
+                  <p className="mt-2 theme-text-primary">{row.speed}</p>
+                </div>
+                <div>
+                  <p className="theme-label">Best For</p>
+                  <p className="mt-2 theme-text-primary">{row.bestFor}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      {error && <p className="theme-error mt-4 text-sm">{error}</p>}
+        <aside className="space-y-4 animate-fade-in delay-1">
+          <GraphStatus />
+          <section className="theme-panel-subtle rounded p-5">
+            <p className="theme-section-title">Compare Setup</p>
+            <p className="theme-note mt-3">
+              Optionally seed Team 1 if you want to see whether the heuristics react
+              differently from the same starting point.
+            </p>
+            <div className="mt-5 grid gap-4">
+              <div>
+                <label className="theme-label block">
+                  Initial Team (optional)
+                </label>
+                <input
+                  type="text"
+                  value={initialTeam}
+                  onChange={(e) => setInitialTeam(e.target.value)}
+                  placeholder={`e.g. ${inputExample}`}
+                  className="theme-input mt-2 w-full rounded px-3 py-2.5 text-sm"
+                />
+              </div>
+              <button
+                onClick={handleCompare}
+                disabled={loading}
+                className="theme-btn-primary min-h-11 w-full px-6 py-2 text-sm"
+              >
+                {loading ? "Comparing..." : "Compare All"}
+              </button>
+            </div>
+
+            {loading && (
+              <div className="mt-5 animate-fade-in">
+                <p className="theme-note mb-2 text-sm">
+                  Running all three algorithms — exhaustive search may take a while on large graphs...
+                </p>
+                <div className="theme-loading-track h-1.5 w-full overflow-hidden rounded-sm">
+                  <div className="theme-loading-fill h-full w-full animate-pulse rounded-sm" />
+                </div>
+              </div>
+            )}
+
+            {error && <p className="theme-error mt-4 text-sm">{error}</p>}
+          </section>
+        </aside>
+      </div>
 
       {/* Results table */}
       {results.length > 0 && (
