@@ -4,7 +4,6 @@ import type { MatchmakingResult } from "../types/matchmaking";
 import GraphStatus from "../components/GraphStatus";
 import HelpAccordion from "../components/HelpAccordion";
 import { ALGORITHM_LABELS } from "../constants/algorithms";
-import { TEAM_COLORS } from "../constants/colors";
 import { useGraph } from "../context/GraphContext";
 import { parseTeamInput } from "../utils/parseTeamInput";
 import { formatPlayerList, getPlayerName } from "../utils/playerNames";
@@ -147,12 +146,12 @@ export default function Compare() {
                     {ALGORITHM_LABELS[r.algorithm] ?? r.algorithm}
                   </td>
                   <td className="px-4 py-3">
-                    <p className="theme-label">({r.team.length} players)</p>
-                    <p className="mt-1" style={{ color: TEAM_COLORS.team1 }}>{formatPlayerList(r.team)}</p>
+                    <p className="theme-label theme-team-value--1">({r.team.length} players)</p>
+                    <p className="theme-team-value--1 mt-1">{formatPlayerList(r.team)}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="theme-label">({r.opposingTeam.length} players)</p>
-                    <p className="mt-1" style={{ color: TEAM_COLORS.team2 }}>{formatPlayerList(r.opposingTeam)}</p>
+                    <p className="theme-label theme-team-value--2">({r.opposingTeam.length} players)</p>
+                    <p className="theme-team-value--2 mt-1">{formatPlayerList(r.opposingTeam)}</p>
                   </td>
                   <td className="px-4 py-3 font-bold theme-text-primary">
                     {Math.round(r.score * 100) / 100}

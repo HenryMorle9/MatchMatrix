@@ -4,7 +4,6 @@ import type { MatchmakingResult } from "../types/matchmaking";
 import GraphStatus from "../components/GraphStatus";
 import HelpAccordion from "../components/HelpAccordion";
 import { ALGORITHMS } from "../constants/algorithms";
-import { TEAM_COLORS } from "../constants/colors";
 import { useGraph } from "../context/GraphContext";
 import { parseTeamInput } from "../utils/parseTeamInput";
 import { formatPlayerList, getPlayerName } from "../utils/playerNames";
@@ -78,16 +77,19 @@ export default function Dashboard() {
             <div>
               <p className="font-semibold theme-text-primary">The Algorithms</p>
               <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="theme-panel rounded p-3">
-                  <p className="font-semibold" style={{ color: TEAM_COLORS.team1 }}>Local Search (First)</p>
+                <div className="theme-panel-subtle rounded p-3">
+                  <p className="theme-label">Heuristic</p>
+                  <p className="mt-1 font-semibold theme-text-primary">Local Search (First)</p>
                   <p className="theme-note mt-1">Tries swapping one player at a time. Takes the first swap that improves the score. Fast but may miss the best answer.</p>
                 </div>
-                <div className="theme-panel rounded p-3">
-                  <p className="font-semibold" style={{ color: TEAM_COLORS.team1 }}>Local Search (Best)</p>
+                <div className="theme-panel-subtle rounded p-3">
+                  <p className="theme-label">Heuristic</p>
+                  <p className="mt-1 font-semibold theme-text-primary">Local Search (Best)</p>
                   <p className="theme-note mt-1">Also swaps one player at a time, but checks every possible swap and picks the best one each round. Slower but smarter.</p>
                 </div>
-                <div className="theme-panel rounded p-3">
-                  <p className="font-semibold text-amber-400">Guaranteed Best (Exhaustive)</p>
+                <div className="theme-panel-subtle rounded p-3">
+                  <p className="theme-label text-amber-700">Exhaustive</p>
+                  <p className="mt-1 font-semibold theme-text-primary">Guaranteed Best</p>
                   <p className="theme-note mt-1">Checks every possible team combination to find the absolute best split. Perfect results, but gets very slow with more than ~20 players.</p>
                 </div>
               </div>
@@ -175,23 +177,23 @@ export default function Dashboard() {
             {ALGORITHMS.find((a) => a.value === result.algorithm)?.label ?? result.algorithm}
           </h2>
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div>
-              <p className="theme-label">Team 1 ({result.team.length})</p>
-              <p className="mt-2 text-lg font-bold" style={{ color: TEAM_COLORS.team1 }}>
+            <div className="theme-team-card theme-team-card--1 p-4">
+              <p className="theme-label theme-team-value--1">Team 1 ({result.team.length})</p>
+              <p className="theme-team-value--1 mt-2 text-lg font-bold leading-relaxed">
                 {formatPlayerList(result.team)}
               </p>
             </div>
-            <div>
-              <p className="theme-label">Team 2 ({result.opposingTeam.length})</p>
-              <p className="mt-2 text-lg font-bold" style={{ color: TEAM_COLORS.team2 }}>
+            <div className="theme-team-card theme-team-card--2 p-4">
+              <p className="theme-label theme-team-value--2">Team 2 ({result.opposingTeam.length})</p>
+              <p className="theme-team-value--2 mt-2 text-lg font-bold leading-relaxed">
                 {formatPlayerList(result.opposingTeam)}
               </p>
             </div>
-            <div>
+            <div className="theme-panel-subtle rounded p-4">
               <p className="theme-label">Score</p>
               <p className="mt-2 text-xl font-bold theme-text-primary">{result.score}</p>
             </div>
-            <div>
+            <div className="theme-panel-subtle rounded p-4">
               <p className="theme-label">Runtime</p>
               <p className="theme-mono mt-2 text-xl font-bold theme-text-primary">
                 {result.runtimeMs} ms

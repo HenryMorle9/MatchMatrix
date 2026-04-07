@@ -345,12 +345,12 @@ export default function Visualise() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <span className="theme-label">Team 1 (Blue)</span>
-                  <p className="mt-2 text-sm" style={{ color: TEAM_COLORS.team1 }}>{formatPlayerList(step.team)}</p>
+                  <span className="theme-label theme-team-value--1">Team 1</span>
+                  <p className="theme-team-value--1 mt-2 text-sm">{formatPlayerList(step.team)}</p>
                 </div>
                 <div>
-                  <span className="theme-label">Team 2 (Red)</span>
-                  <p className="mt-2 text-sm" style={{ color: TEAM_COLORS.team2 }}>{formatPlayerList(step.opposingTeam)}</p>
+                  <span className="theme-label theme-team-value--2">Team 2</span>
+                  <p className="theme-team-value--2 mt-2 text-sm">{formatPlayerList(step.opposingTeam)}</p>
                 </div>
               </div>
               <div>
